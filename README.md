@@ -1,4 +1,4 @@
-# Juris on Nuxt 3
+# Juris on Nuxt 3 Nomotechnia
 
 Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 
