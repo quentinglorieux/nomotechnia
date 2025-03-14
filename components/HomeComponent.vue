@@ -1,7 +1,7 @@
 <template>
   <div class="p-1 min-h-screen">
     <!-- <h1 class="home-titre" style="text-align: center">
-      Projet Juris
+      Projet Juris 
     </h1> -->
     <div class="home-chapeau ">
       <p>
