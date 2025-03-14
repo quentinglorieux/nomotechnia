@@ -1,7 +1,7 @@
 <template>
   <div class="flex min-h-screen">
 
-    <!-- <NavThemes  @themeSelected="(e) => (themeSelection = e)" /> -->
+    <!-- <NavThemes   @themeSelected="(e) => (themeSelection = e)" /> -->
     <MainThemes :theme="navStore.selectedThemeID"/>
     
   </div>
