@@ -25,19 +25,19 @@
         </div>
       </h1>
 
-      <div class="bg-slate-200 p-2 rounded m-2">
+      <div v-if="fetched_data.data.abstract" class="bg-slate-200 p-2 rounded m-2">
         <h3 class="px-2">Résumé:</h3>
         <div class="p-2" v-html="fetched_data.data.abstract"></div>
       </div>
       
       <div class="pt-3 px-2 m-2 " v-html="parsedMarkdown"></div>
 
-      <div class="bg-slate-200 p-2 mt-10 m-2 rounded ">
+      <div v-if="store.commentaires.references" class="bg-slate-200 p-2 mt-10 m-2 rounded ">
         <h3 class="px-2">Références :</h3>
         <div> <ul  class="px-2 pb-3" > <li v-for="ref in store.commentaires.references"> <a :id="'ref'+ ref.id"> [{{ ref.id }}] {{ ref.titre }} </a> <a :href="'#s' + ref.id"> - Retour </a></li> </ul> </div>
       </div>
 
-      <div class="bg-slate-300 p-2 mt-10 m-2 rounded ">
+      <div v-if="fetched_data.data.citation" class="bg-slate-300 p-2 mt-10 m-2 rounded ">
         <h3 class="px-2">Citation :</h3>
         <div class="px-2 pb-3" v-html="fetched_data.data.citation"></div>
       </div>

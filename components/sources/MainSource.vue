@@ -27,7 +27,7 @@
           <SplitterPanel :size="40">
             <div class="split-menu">
               <div>
-                <TabView>
+                <TabView v-model:activeIndex="activeTabIndex">
                   <!-- Onglet principal Commentaires -->
                   <TabPanel header="Commentaires">
                     <div class="section" id="comments"></div>
@@ -55,22 +55,18 @@
                     :key="typeNom"
                     :header="typeNom"
                   >
-                    <div class="section" :id="typeNom.replace(/\s+/g, '-').toLowerCase()">
-                      <ul>
-                        <li
-                          v-for="com in getCommentsByType(typeNom)"
-                          :key="com.id"
-                          class="border-b py-1"
-                        >
-                          <strong>{{ com.titre }}</strong><br />
-                          <span v-html="com.content"></span>
-                        </li>
-                      </ul>
+                    <div
+                      class="section"
+                      :id="typeNom.replace(/\s+/g, '-').toLowerCase()"
+                    >
+                      <SourceGenericComments
+                        :comments="getCommentsByType(typeNom)"
+                      />
                     </div>
                   </TabPanel>
                 </TabView>
-</div>
-                <div class="source-commentaire" v-if="navStore.comVisibility">
+              </div>
+              <div class="source-commentaire" v-if="navStore.comVisibility">
                 <div class="close-button bg-slate-200 rounded pl-1 py-0 m-2">
                   <Button
                     icon="pi pi-times"
@@ -85,11 +81,11 @@
                   >
                   </Button>
                 </div>
-                <TabView >
+                <TabView>
                   <TabPanel>
                     <template #header>
-                      {{ comTitre }} 
-                    </template> 
+                      {{ comTitre }}
+                    </template>
                     <ScrollPanel
                       style="
                         margin: 0.1rem;
@@ -105,7 +101,12 @@
                       <ScrollTop
                         target="parent"
                         :threshold="100"
-                        style=".p-scrolltop{position: sticky; bottom: 60px; }"
+                        style="
+                          .p-scrolltop {
+                            position: sticky;
+                            bottom: 60px;
+                          }
+                        "
                         icon="pi pi-arrow-up"
                       />
                     </ScrollPanel>
@@ -120,7 +121,7 @@
                       ></CommentsKeywords>
                     </ScrollPanel>
                   </TabPanel>
-                  </TabView>
+                </TabView>
               </div>
             </div>
           </SplitterPanel>
@@ -159,16 +160,41 @@ const commentTypes = computed(() => {
   return types;
 });
 
-// Retourne tous les commentaires correspondant à un type donné
-function getCommentsByType(typeNom) {
+const commentTypesId = computed(() => {
   if (!source.value || !source.value.data || !source.value.data.commentaires) {
     return [];
   }
 
   const rawCommentaires = toRaw(source.value.data.commentaires);
 
+  const types = rawCommentaires
+    .map((c) => c.type?.id)
+    .filter(
+      (id, index, self) =>
+        id &&
+        self.indexOf(id) === index
+    );
+
+  return types;
+});
+
+// Retourne tous les commentaires correspondant à un type donné
+function getCommentsByType(typeNom) {
+  if (!source.value || !source.value.data || !source.value.data.commentaires) {
+    return [];
+  }
+  const rawCommentaires = toRaw(source.value.data.commentaires);
   return rawCommentaires.filter((c) => c.type?.Nom === typeNom);
 }
+
+function getCommentsByID(typeNom) {
+  if (!source.value || !source.value.data || !source.value.data.commentaires) {
+    return [];
+  }
+  const rawCommentaires = toRaw(source.value.data.commentaires);
+  return rawCommentaires.filter((c) => c.type?.id === typeNom);
+}
+
 const oldID = ref();
 
 import edjsHTML from "editorjs-html";
@@ -228,7 +254,7 @@ async function retrieveSourceData(id) {
   source.value = await useAsyncData(() => {
     return $directus.items("sources").readOne(id, {
       fields: [
-        "id,titre,type_de_source.*,meta,texte,commentaires.id,commentaires.type.Nom,commentaires.titre,commentaires.content,commentaires.keywords_id.keywords_id.titre,commentaires.keywords_id.keywords_id.id,theme_id.titre,theme_id.id",
+        "id,titre,type_de_source.*,meta,texte,commentaires.id,commentaires.type.id,commentaires.type.Nom,commentaires.titre,commentaires.content,commentaires.keywords_id.keywords_id.titre,commentaires.keywords_id.keywords_id.id,theme_id.titre,theme_id.id",
       ],
     });
   });
@@ -268,6 +294,23 @@ store.$subscribe(() => {
       );
     } else {
       el.setAttribute("style", "background-color:var(--surface-link);");
+    }
+  }
+});
+
+const activeTabIndex = ref(0);
+
+watch(activeTabIndex, (newIndex) => {
+  const offset = 2;
+  const dynamicIndex = newIndex - offset;
+
+  if (dynamicIndex >= 0) {
+    const typeNom = commentTypesId.value[dynamicIndex];
+    const comments = getCommentsByID(typeNom);
+    console.log(comments);
+    if (comments.length === 1) {
+      // retrieveComments(comments[0]);
+      // console.log(comments[0]);
     }
   }
 });
