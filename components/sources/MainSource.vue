@@ -7,7 +7,7 @@
       <div>
         <div class="titre-page">
           <h1>{{ source.data.titre }}</h1>
-          <p v-if="source.data">[{{ source.data.type }}]</p>
+          <p v-if="source.data">[{{ source.data.type_de_source.Nom }}]</p>
         </div>
         <Splitter>
           <SplitterPanel :size="60" class="">
@@ -28,6 +28,7 @@
             <div class="split-menu">
               <div>
                 <TabView>
+                  <!-- Onglet principal Commentaires -->
                   <TabPanel header="Commentaires">
                     <div class="section" id="comments"></div>
                     <SourceComments
@@ -36,23 +37,40 @@
                     />
                   </TabPanel>
 
+                  <!-- Onglet Mots-clés -->
                   <TabPanel header="Mots-clés">
                     <div class="section" id="keywords"></div>
                     <SourceKeywords :source="source" />
                   </TabPanel>
 
+                  <!-- Onglet Thèmes -->
                   <TabPanel header="Thèmes">
                     <div class="section" id="themes"></div>
                     <SourceThemes :source="source" />
                   </TabPanel>
 
-                  <!-- <TabPanel header="Traduction(s)">
-                    <h2>Traduction(s)</h2>
-                  </TabPanel> -->
+                  <!-- Onglets dynamiques pour chaque type de commentaire -->
+                  <TabPanel
+                    v-for="typeNom in commentTypes"
+                    :key="typeNom"
+                    :header="typeNom"
+                  >
+                    <div class="section" :id="typeNom.replace(/\s+/g, '-').toLowerCase()">
+                      <ul>
+                        <li
+                          v-for="com in getCommentsByType(typeNom)"
+                          :key="com.id"
+                          class="border-b py-1"
+                        >
+                          <strong>{{ com.titre }}</strong><br />
+                          <span v-html="com.content"></span>
+                        </li>
+                      </ul>
+                    </div>
+                  </TabPanel>
                 </TabView>
-              </div>
-
-              <div class="source-commentaire" v-if="navStore.comVisibility">
+</div>
+                <div class="source-commentaire" v-if="navStore.comVisibility">
                 <div class="close-button bg-slate-200 rounded pl-1 py-0 m-2">
                   <Button
                     icon="pi pi-times"
@@ -102,12 +120,7 @@
                       ></CommentsKeywords>
                     </ScrollPanel>
                   </TabPanel>
-                  <!-- <TabPanel>
-                  <template #header>
-                    <span>Thèmes associés</span>
-                  </template>
-                </TabPanel> -->
-                </TabView>
+                  </TabView>
               </div>
             </div>
           </SplitterPanel>
@@ -125,6 +138,37 @@ const store = useGlobalStore();
 
 const props = defineProps(["sourceID"]);
 const source = ref();
+
+// Liste des types uniques de commentaires pour la source sélectionnée
+const commentTypes = computed(() => {
+  if (!source.value || !source.value.data || !source.value.data.commentaires) {
+    return [];
+  }
+
+  const rawCommentaires = toRaw(source.value.data.commentaires);
+
+  const types = rawCommentaires
+    .map((c) => c.type?.Nom)
+    .filter(
+      (nom, index, self) =>
+        nom &&
+        nom.toLowerCase() !== "commentaire" && // Exclude fixed tab
+        self.indexOf(nom) === index
+    );
+
+  return types;
+});
+
+// Retourne tous les commentaires correspondant à un type donné
+function getCommentsByType(typeNom) {
+  if (!source.value || !source.value.data || !source.value.data.commentaires) {
+    return [];
+  }
+
+  const rawCommentaires = toRaw(source.value.data.commentaires);
+
+  return rawCommentaires.filter((c) => c.type?.Nom === typeNom);
+}
 const oldID = ref();
 
 import edjsHTML from "editorjs-html";
@@ -137,17 +181,20 @@ const editorJScontent = computed(() => {
   }
 });
 
-const Cblock = computed((block) => {console.log(block);return 'block'})
+const Cblock = computed((block) => {
+  console.log(block);
+  return "block";
+});
 
-
-const comTitre = computed(()=> { 
-if( store.commentaires.titre) { const a = store.commentaires.titre.substring(0, 35)
-const b = store.commentaires.titre.length > 35 ? "[ ...]" : "" 
-const c = a + b 
-return c } 
-return ''})
-
-
+const comTitre = computed(() => {
+  if (store.commentaires.titre) {
+    const a = store.commentaires.titre.substring(0, 35);
+    const b = store.commentaires.titre.length > 35 ? "[ ...]" : "";
+    const c = a + b;
+    return c;
+  }
+  return "";
+});
 
 onMounted(() => {
   if (navStore.selectedSourceID) {
@@ -181,7 +228,7 @@ async function retrieveSourceData(id) {
   source.value = await useAsyncData(() => {
     return $directus.items("sources").readOne(id, {
       fields: [
-        "id,titre,type,meta,texte,commentaires.id,commentaires.titre,commentaires.content,commentaires.keywords_id.keywords_id.titre,commentaires.keywords_id.keywords_id.id,theme_id.titre,theme_id.id",
+        "id,titre,type_de_source.*,meta,texte,commentaires.id,commentaires.type.Nom,commentaires.titre,commentaires.content,commentaires.keywords_id.keywords_id.titre,commentaires.keywords_id.keywords_id.id,theme_id.titre,theme_id.id",
       ],
     });
   });
@@ -215,7 +262,10 @@ store.$subscribe(() => {
   const comments = document.getElementsByTagName("mark");
   for (const el of comments) {
     if (el.getAttribute("data-linkedcomment") == store.commentaires.id) {
-      el.setAttribute("style", "background-color:var(--surface-link-selected);");
+      el.setAttribute(
+        "style",
+        "background-color:var(--surface-link-selected);"
+      );
     } else {
       el.setAttribute("style", "background-color:var(--surface-link);");
     }
@@ -227,5 +277,4 @@ store.$subscribe(() => {
 .p-tabview .p-tabview-panels {
   padding: 0;
 }
-
 </style>
