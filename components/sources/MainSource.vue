@@ -208,7 +208,7 @@ const editorJScontent = computed(() => {
 });
 
 const Cblock = computed((block) => {
-  console.log(block);
+  // console.log(block);
   return "block";
 });
 
@@ -307,7 +307,7 @@ watch(activeTabIndex, (newIndex) => {
   if (dynamicIndex >= 0) {
     const typeNom = commentTypesId.value[dynamicIndex];
     const comments = getCommentsByID(typeNom);
-    console.log(comments);
+    // console.log(comments);
     if (comments.length === 1) {
       // retrieveComments(comments[0]);
       // console.log(comments[0]);

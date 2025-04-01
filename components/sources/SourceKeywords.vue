@@ -50,16 +50,27 @@ async function retrieveKeywords() {
 
 function listDuplicate() {
   const l1 = [];
-  for (let com of props.source.data.commentaires) {
-    for (let kw of com.keywords_id) {
-      l1.push({ titre: kw.keywords_id.titre, id: kw.keywords_id.id });
+
+  for (let com of props.source?.data?.commentaires ?? []) {
+    if (Array.isArray(com.keywords_id)) {
+      for (let kw of com.keywords_id) {
+        if (kw?.keywords_id) {
+          l1.push({
+            titre: kw.keywords_id.titre,
+            id: kw.keywords_id.id,
+          });
+        }
+      }
     }
   }
+
+  // Supprimer les doublons (même titre + id)
   const uniqueMap = new Map();
   const uniqueArray = l1.filter((obj) => {
     const key = `${obj.titre}_${obj.id}`;
     return !uniqueMap.has(key) && uniqueMap.set(key, obj);
   });
+
   return uniqueArray;
 }
 
