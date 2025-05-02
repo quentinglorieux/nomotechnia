@@ -22,10 +22,11 @@
         <div class="titre-page">
           <h1>{{ kw.titre }}</h1>
         </div>
-
+        <div v-if="kw.introduction"> 
         <Panel class="pr-2 pt-2" header="Introduction" toggleable>
           <div v-html="kw.introduction"></div>
         </Panel>
+      </div>
         <!-- <h4>Commentaires associés</h4> -->
         <div class="py-2 pr-2" style="text-align: left">
           <DataTable

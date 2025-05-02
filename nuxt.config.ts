@@ -9,7 +9,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     apiSecret: '1',
     public: {
-      API_BASE_URL: 'https://jurisdirectus.rubidiumweb.eu'
+      API_BASE_URL: 'https://admin.nomotechnia.rubidiumweb.fr'
+      // API_BASE_URL: 'https://jurisdirectus.rubidiumweb.eu'
     }
   },
   css: [
