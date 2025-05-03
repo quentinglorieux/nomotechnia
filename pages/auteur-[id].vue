@@ -132,7 +132,7 @@ async function retrieveAuthor() {
       },
     });
   });
-  console.log(publicData);
+  // console.log(publicData);
   var L = publicData.value.data;
   author.value = L[0];
 }

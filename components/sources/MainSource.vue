@@ -11,10 +11,17 @@
         </div>
         <Splitter>
           <SplitterPanel :size="60" class="">
+    
             <ScrollPanel>
-              <div class="p-3" v-for="block in editorJScontent">
+             <FlexibleEditorContent class="p-3"
+                v-if="source?.data.content"
+                :content="source.data.content"
+                :relation-marks="relationMarks"
+
+              />
+              <!-- <div class="p-3" v-for="block in editorJScontent">
                 <div v-html="block"></div>
-              </div>
+              </div> -->
               <ScrollTop
                 target="parent"
                 :threshold="100"
@@ -31,7 +38,7 @@
                   <!-- Onglet principal Commentaires -->
                   <TabPanel header="Commentaires">
                     <div class="section" id="comments"></div>
-                    <SourceComments
+                    <SourceComments v-if="store.commentaires"
                       :source="source"
                       :comSelected="store.commentaires"
                     />
@@ -134,6 +141,9 @@
 <script setup>
 import { useNavStore } from "@/stores/navigation";
 import { useGlobalStore } from "~/stores/global";
+import { injectDataIntoContent } from "directus-extension-flexible-editor/content";
+import FlexibleEditorContent from "directus-extension-flexible-editor/content/vue";
+import RelatedComment from "./RelatedComment.vue";
 const navStore = useNavStore();
 const store = useGlobalStore();
 
@@ -169,11 +179,7 @@ const commentTypesId = computed(() => {
 
   const types = rawCommentaires
     .map((c) => c.type?.id)
-    .filter(
-      (id, index, self) =>
-        id &&
-        self.indexOf(id) === index
-    );
+    .filter((id, index, self) => id && self.indexOf(id) === index);
 
   return types;
 });
@@ -197,23 +203,23 @@ function getCommentsByID(typeNom) {
 
 const oldID = ref();
 
-import edjsHTML from "editorjs-html";
-const edjsParser = edjsHTML();
-const editorJScontent = computed(() => {
-  if (source.value && source.value.data) {
-    return edjsParser.parse(source.value.data.texte);
-  } else {
-    return null;
-  }
-});
+// import edjsHTML from "editorjs-html";
+// const edjsParser = edjsHTML();
+// const editorJScontent = computed(() => {
+//   if (source.value && source.value.data) {
+//     return edjsParser.parse(source.value.data.texte);
+//   } else {
+//     return null;
+//   }
+// });
 
-const Cblock = computed((block) => {
-  // console.log(block);
-  return "block";
-});
+// const Cblock = computed((block) => {
+//   // console.log(block);
+//   return "block";
+// });
 
 const comTitre = computed(() => {
-  if (store.commentaires.titre) {
+  if (store.commentaires?.titre) {
     const a = store.commentaires.titre.substring(0, 35);
     const b = store.commentaires.titre.length > 35 ? "[ ...]" : "";
     const c = a + b;
@@ -234,18 +240,18 @@ onUpdated(() => {
   }
   oldID.value = navStore.selectedSourceID;
 
-  const comments = document.getElementsByTagName("mark");
-  for (const el of comments) {
-    el.addEventListener("click", () => {
-      for (const el2 of comments) {
-        var comId = el2.getAttribute("data-linkedcomment");
-        if (el.getAttribute("data-linkedcomment") == comId) {
-          navStore.comID = comId;
-        }
-      }
-      retrieveComments(navStore.comID);
-    });
-  }
+  // const comments = document.getElementsByTagName("mark");
+  // for (const el of comments) {
+  //   el.addEventListener("click", () => {
+  //     for (const el2 of comments) {
+  //       var comId = el2.getAttribute("data-linkedcomment");
+  //       if (el.getAttribute("data-linkedcomment") == comId) {
+  //         navStore.comID = comId;
+  //       }
+  //     }
+  //     retrieveComments(navStore.comID);
+  //   });
+  // }
 });
 
 // DataFetching of the selected Source(id)
@@ -254,14 +260,26 @@ async function retrieveSourceData(id) {
   source.value = await useAsyncData(() => {
     return $directus.items("sources").readOne(id, {
       fields: [
-        "id,titre,type_de_source.*,meta,texte,commentaires.id,commentaires.type.id,commentaires.type.Nom,commentaires.titre,commentaires.content,commentaires.keywords_id.keywords_id.titre,commentaires.keywords_id.keywords_id.id,theme_id.titre,theme_id.id",
+        "id,titre,type_de_source.*,meta,texte,content,editor_nodes.id,editor_nodes.item,editor_nodes.collection,commentaires.id,commentaires.type.id,commentaires.type.Nom,commentaires.titre,commentaires.content,commentaires.keywords_id.keywords_id.titre,commentaires.keywords_id.keywords_id.id,theme_id.titre,theme_id.id",
       ],
     });
   });
 
+  injectDataIntoContent(source.value.data.editor_nodes, source.value.data.content)
+  //  Define renderers for relations
+
   store.sources[store.sources.findIndex((x) => x.id === id)] =
     source.value.data;
 }
+
+const relationBlocks = [];
+const relationInlineBlocks = [];
+const relationMarks = [
+  { collection: "related_comments", component: RelatedComment },
+];
+
+//  Define renderers for custom blocks or marks
+// const componentSerializers = [];
 
 const kwSelectectComment = computed(() => {
   const dataSource =
@@ -272,7 +290,7 @@ const kwSelectectComment = computed(() => {
     dataSource.commentaires[
       dataSource.commentaires.findIndex((x) => x.id === navStore.comID)
     ];
-  return dataSelectedComment.keywords_id;
+  return dataSelectedComment ? dataSelectedComment.keywords_id : [];
 });
 
 async function retrieveComments(id) {
@@ -284,19 +302,19 @@ async function retrieveComments(id) {
   navStore.navVisibility = false;
 }
 
-store.$subscribe(() => {
-  const comments = document.getElementsByTagName("mark");
-  for (const el of comments) {
-    if (el.getAttribute("data-linkedcomment") == store.commentaires.id) {
-      el.setAttribute(
-        "style",
-        "background-color:var(--surface-link-selected);"
-      );
-    } else {
-      el.setAttribute("style", "background-color:var(--surface-link);");
-    }
-  }
-});
+// store.$subscribe(() => {
+//   const comments = document.getElementsByTagName("mark");
+//   for (const el of comments) {
+//     if (el.getAttribute("data-linkedcomment") == store.commentaires.id) {
+//       el.setAttribute(
+//         "style",
+//         "background-color:var(--surface-link-selected);"
+//       );
+//     } else {
+//       el.setAttribute("style", "background-color:var(--surface-link);");
+//     }
+//   }
+// });
 
 const activeTabIndex = ref(0);
 
@@ -315,8 +333,7 @@ watch(activeTabIndex, (newIndex) => {
   }
 });
 
-
-
+// 2. Inject node data into the editor content
 </script>
 
 <style>

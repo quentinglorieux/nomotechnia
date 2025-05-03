@@ -122,7 +122,7 @@ async function retrieveThemes() {
       to: "/themes",
       command: () => {
         navStore.selectedThemeID = theme.id;
-        console.log(navStore.selectedThemeID);
+        // console.log(navStore.selectedThemeID);
       },
     });
   }
