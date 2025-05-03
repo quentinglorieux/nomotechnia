@@ -19,9 +19,7 @@
                 :relation-marks="relationMarks"
 
               />
-              <!-- <div class="p-3" v-for="block in editorJScontent">
-                <div v-html="block"></div>
-              </div> -->
+
               <ScrollTop
                 target="parent"
                 :threshold="100"
@@ -203,20 +201,6 @@ function getCommentsByID(typeNom) {
 
 const oldID = ref();
 
-// import edjsHTML from "editorjs-html";
-// const edjsParser = edjsHTML();
-// const editorJScontent = computed(() => {
-//   if (source.value && source.value.data) {
-//     return edjsParser.parse(source.value.data.texte);
-//   } else {
-//     return null;
-//   }
-// });
-
-// const Cblock = computed((block) => {
-//   // console.log(block);
-//   return "block";
-// });
 
 const comTitre = computed(() => {
   if (store.commentaires?.titre) {
@@ -240,18 +224,7 @@ onUpdated(() => {
   }
   oldID.value = navStore.selectedSourceID;
 
-  // const comments = document.getElementsByTagName("mark");
-  // for (const el of comments) {
-  //   el.addEventListener("click", () => {
-  //     for (const el2 of comments) {
-  //       var comId = el2.getAttribute("data-linkedcomment");
-  //       if (el.getAttribute("data-linkedcomment") == comId) {
-  //         navStore.comID = comId;
-  //       }
-  //     }
-  //     retrieveComments(navStore.comID);
-  //   });
-  // }
+
 });
 
 // DataFetching of the selected Source(id)
@@ -262,6 +235,7 @@ async function retrieveSourceData(id) {
       fields: [
         "id,titre,type_de_source.*,meta,texte,content,editor_nodes.id,editor_nodes.item,editor_nodes.collection,commentaires.id,commentaires.type.id,commentaires.type.Nom,commentaires.titre,commentaires.content,commentaires.keywords_id.keywords_id.titre,commentaires.keywords_id.keywords_id.id,theme_id.titre,theme_id.id",
       ],
+      
     });
   });
 
@@ -302,19 +276,7 @@ async function retrieveComments(id) {
   navStore.navVisibility = false;
 }
 
-// store.$subscribe(() => {
-//   const comments = document.getElementsByTagName("mark");
-//   for (const el of comments) {
-//     if (el.getAttribute("data-linkedcomment") == store.commentaires.id) {
-//       el.setAttribute(
-//         "style",
-//         "background-color:var(--surface-link-selected);"
-//       );
-//     } else {
-//       el.setAttribute("style", "background-color:var(--surface-link);");
-//     }
-//   }
-// });
+
 
 const activeTabIndex = ref(0);
 

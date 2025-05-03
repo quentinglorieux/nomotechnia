@@ -25,6 +25,11 @@ async function retrieveData() {
   const { data: publicData } = await useAsyncData(() => {
     return $directus.items("sources").readByQuery({
       fields: ["id,titre"],
+      filter: {
+      status: {
+        _eq: "published"
+      }
+    }
     });
   });
   store.sources = publicData.value.data; //Storage of Sources data
