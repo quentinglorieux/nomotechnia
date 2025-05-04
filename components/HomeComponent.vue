@@ -3,68 +3,109 @@
     <!-- <h1 class="home-titre" style="text-align: center">
       Projet Juris 
     </h1> -->
-    <div class="home-chapeau ">
-      <p>
-        Courte description u projet : lorem ipsum dolor sit amet, consectetur
-        adipiscing elit. Morbi bibendum efficitur neque et congue. Phasellus ut
-        velit tortor. Donec sollicitudin ante at auctor aliquet. Praesent eu
-        suscipit erat. Vestibulum feugiat justo nec lacus pulvinar aliquam sit
-        amet vehicula augue. Nullam elementum orci sit amet volutpat
-        condimentum. Nam ac dictum leo. Sed bibendum laoreet fermentum.
-        Suspendisse a enim a dui accumsan commodo. Sed convallis, nibh ac
-        tristique feugiat, erat nisl suscipit est, id dapibus orci orci id
-        metus.
-      </p>
-    </div>
+    <div class="homepage-container">
 
-    <div>
-      <DataView :value="items" :layout="layout">
-        <!-- <template #header>
-          <div class="flex justify-content-end">
-            <DataViewLayoutOptions v-model="layout" />
-          </div>
-        </template> -->
-
-        <!-- <template #list="slotProps">
-          <div class="col-12">
-            <div
-              class="flex flex-column xl:flex-row xl:align-items-start p-4 gap-4"
-            >
-              <div
-                class="flex flex-column sm:flex-row justify-content-between align-items-center xl:align-items-start flex-1 gap-4"
-              >
+            <!-- Left COLUMN -->
+            <div class="home-sidebar">
+        <DataView :value="items" :layout="layout">
+          <template #grid="slotProps">
+            <div class="col-12 p-1">
+              <NuxtLink :to="slotProps.data.to" class="block">
                 <div
-                  class="flex flex-column align-items-center sm:align-items-start gap-3"
+                  class="flex items-center gap-3 p-3 hover:bg-gray-100 rounded transition-all"
                 >
-                  <div class="text-2xl font-bold text-900">
-                    {{ slotProps.data.label }} 
-                  </div> 
-                </div>
-              </div>
-            </div>
-          </div>
-        </template> -->
-
-        <template #grid="slotProps">
-          <div class="col-12 sm:col-6 lg:col-12 xl:col-2 p-2">
-            <div class="p-4">
-              <NuxtLink :to="slotProps.data.to">
-                <div class=" flex flex-column align-items-center gap-3 py-5 hover:text-blue-800">
-                  <i :class="slotProps.data.icon" style="font-size: 5rem"></i>
-                  <div class="text-2xl">{{ slotProps.data.label }}</div>
+                  <i
+                    :class="slotProps.data.icon"
+                    class="text-xl text-blue-700"
+                  ></i>
+                  <div class="text-lg small-caps font-medium text-gray-800">
+                    {{ slotProps.data.label }}
+                  </div>
                 </div>
               </NuxtLink>
             </div>
-          </div>
-        </template>
-      </DataView>
+          </template>
+        </DataView>
+      </div>
+
+      <div class="home-chapeau">
+        <div>
+          <h1>📘 Qu’est-ce que Nomotechnia ?</h1>
+          <p>
+            🏛️
+            <em>Lire, comprendre, commenter les grands arrêts britanniques</em>
+          </p>
+          <p>
+            <strong>Nomotechnia</strong> est une plateforme collaborative dédiée
+            à l’étude, à l’annotation et à la compréhension des grands arrêts de
+            la jurisprudence britannique.
+          </p>
+          <p>
+            Notre objectif : offrir un outil structurant pour naviguer dans la
+            complexité du droit à travers
+            <strong>les décisions de justice majeures</strong>, enrichies par
+            des <strong>commentaires analytiques</strong>, des
+            <strong>mots-clés</strong> pertinents, et une
+            <strong>organisation thématique rigoureuse</strong>.
+          </p>
+
+          <h2>🔍 Ce que vous trouverez</h2>
+          <ul>
+            <li>
+              Des décisions de justice fondatrices (House of Lords, Supreme
+              Court, Court of Appeal…)
+            </li>
+            <li>
+              Des commentaires argumentés par des enseignants, chercheurs ou
+              praticiens
+            </li>
+            <li>
+              Un classement par mots-clés pour explorer les notions juridiques
+              majeures
+            </li>
+            <li>
+              Une navigation par grands thèmes (droit constitutionnel, libertés
+              publiques…)
+            </li>
+          </ul>
+
+          <h2>🧭 Pour commencer</h2>
+          <ul>
+            <li>
+              <strong>Explorer les grands arrêts</strong> par date, juridiction
+              ou importance
+            </li>
+            <li><strong>Lire les commentaires</strong> associés</li>
+            <li><strong>Rechercher par mot-clé ou thème</strong></li>
+          </ul>
+
+          <h2>🤝 Contribuer</h2>
+          <p>
+            Juriste, enseignant, étudiant ? Vous pouvez
+            <strong>proposer un commentaire</strong>,
+            <strong>suggérer un arrêt</strong> ou
+            <strong>corriger une fiche existante</strong>.
+          </p>
+
+          <h3 style="margin-top: 2em">📚 Pourquoi ce projet ?</h3>
+          <p>
+            Parce que le <strong>droit est vivant</strong>, et que sa
+            compréhension passe par un dialogue critique avec la jurisprudence.
+          </p>
+          <p>
+            Parce que les arrêts sont des récits, des constructions doctrinales,
+            des vecteurs de normes. Et parce que le droit britannique, par sa
+            tradition de <em>common law</em>, se prête particulièrement bien à
+            une lecture en réseau.
+          </p>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
 
 <script setup>
-
-
 const layout = ref("grid");
 
 const items = ref([

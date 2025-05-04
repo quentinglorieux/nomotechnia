@@ -5,7 +5,6 @@
     <div class="layout-topbar">
       <!-- <router-link to="/" class="layout-topbar-logo"> -->
         <!-- <img src="@/assets/logo.png" alt="logo" /> -->
-        <span>Logo</span>
 
 
       <Menubar
@@ -22,7 +21,7 @@
           <i class="pi pi-search"></i>
           <span>Search</span>
         </button>
-        <NuxtLink to="https://jurisdirectus.rubidiumweb.eu/" target="_blank"> <button @click="onSettingsClick()" class="p-link layout-topbar-button">
+        <NuxtLink to="https://admin.nomotechnia.rubidiumweb.fr/" target="_blank"> <button @click="onSettingsClick()" class="p-link layout-topbar-button">
           <i class="pi pi-cog"></i>
           <span>Settings</span>
         </button>

@@ -40,11 +40,25 @@ async function retrieveKeywords() {
   const { data: publicData } = await useAsyncData(() => {
     return $directus.items("keywords").readByQuery({
       fields: [
-        "titre,id,introduction,commentaires.commentaires_id.titre,commentaires.commentaires_id.id,commentaires.commentaires_id.auteur_id.first_name,commentaires.commentaires_id.auteur_id.last_name,commentaires.commentaires_id.source_id.titre,commentaires.commentaires_id.source_id.id",
+        "titre",
+        "id",
+        "introduction",
+        "commentaires.commentaires_id.titre",
+        "commentaires.commentaires_id.id",
+        "commentaires.commentaires_id.auteur_id.first_name",
+        "commentaires.commentaires_id.auteur_id.last_name",
+        "commentaires.commentaires_id.source_id.id",
+        "commentaires.commentaires_id.source_id.titre",
       ],
+      filter: {
+        commentaires: {
+          _nnull: true, // ← only keywords with linked comments
+        },
+      },
     });
   });
-  store.keywords = publicData.value.data; //Storage of Keywords data
+
+  store.keywords = publicData.value?.data || [];
 }
 
 

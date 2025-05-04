@@ -3,20 +3,17 @@
     <div class="flex flex-column p-1 w-full">
       <!-- {{ navStore.selectedKeywordID }} -->
       <div class="card2 bg-slate-100" v-if="!kw">
-        <h1>Navigation par Mot-clés</h1>
-        <div>
-          Sed ut perspiciatis unde omnis iste natus error sit voluptatem
-          accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae
-          ab illo inventore veritatis et quasi architecto beatae vitae dicta
-          sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit
-          aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos
-          qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui
-          dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed
-          quia non numquam eius modi tempora incidunt ut labore et dolore magnam
-          aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum
-          exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex
-          ea commodi consequatur? Quis au
-        </div>
+        <h2>Navigation par Mot-clés</h2>
+<div class="text-justify leading-relaxed text-gray-700">
+  Cette section vous permet d’explorer les grands arrêts britanniques à travers une sélection de <strong>mots-clés juridiques</strong>. 
+  Chaque mot-clé regroupe des commentaires associés à des décisions majeures, offrant une lecture transversale des enjeux doctrinaux et jurisprudentiels.
+
+  <br /><br />
+  Utilisez cette navigation pour parcourir les concepts fondamentaux du <em>Common Law</em> — <strong>judicial review</strong>, <strong>rule of law</strong>, <strong>proportionality</strong>, <strong>due process</strong> — et découvrir comment ils sont mobilisés et débattus dans les commentaires liés aux sources.
+
+  <br /><br />
+  Cliquez sur un mot-clé pour consulter sa fiche explicative, la liste des commentaires associés, les décisions concernées, et les auteurs ayant contribué à son analyse.
+</div>
       </div>
       <div v-else>
         <div class="titre-page">

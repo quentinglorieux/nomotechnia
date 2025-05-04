@@ -1,23 +1,46 @@
 <template>
   <div class="flex flex-column w-full">
-    <div v-if="!source">
-      <h1>Sélectionnez une Source</h1>
+    <div class="card2 bg-slate-100" v-if="!source">
+      <h2>Sélectionnez une Source</h2>
+      <div class="text-gray-700 leading-relaxed text-justify max-w-3xl">
+        Cette section répertorie les principales
+        <strong>décisions de justice britanniques</strong> analysées sur
+        Nomotechnia.
+
+        <br /><br />
+        Vous y trouverez des arrêts sélectionnés pour leur portée doctrinale,
+        leur intérêt pédagogique ou leur valeur fondatrice.
+
+        <br /><br />
+        Cliquez sur une source pour accéder à sa fiche complète. Celle-ci inclut
+        le texte de l’arrêt, des commentaires associés, les notions juridiques
+        mobilisées, ainsi que des liens vers les auteurs ou d'autres arrêts
+        connexes.
+
+        <br /><br />
+        Vous pouvez aussi explorer les sources via les mots-clés ou les grands
+        thèmes accessibles depuis la page d’accueil.
+      </div>
     </div>
     <div v-else>
       <div>
         <div class="titre-page">
-          <h1>{{ source.data.titre }}</h1>
+          <div>
+            <h1>{{ source.data.titre }}</h1>
+            <p class="pl-4">{{ source.data.meta }}</p>
+          </div>
+
           <p v-if="source.data">[{{ source.data.type_de_source.Nom }}]</p>
         </div>
+
         <Splitter>
           <SplitterPanel :size="60" class="">
-    
             <ScrollPanel>
-             <FlexibleEditorContent class="p-3"
+              <FlexibleEditorContent
+                class="p-3"
                 v-if="source?.data.content"
                 :content="source.data.content"
                 :relation-marks="relationMarks"
-
               />
 
               <ScrollTop
@@ -36,7 +59,8 @@
                   <!-- Onglet principal Commentaires -->
                   <TabPanel header="Commentaires">
                     <div class="section" id="comments"></div>
-                    <SourceComments v-if="store.commentaires"
+                    <SourceComments
+                      v-if="store.commentaires"
                       :source="source"
                       :comSelected="store.commentaires"
                     />
@@ -201,7 +225,6 @@ function getCommentsByID(typeNom) {
 
 const oldID = ref();
 
-
 const comTitre = computed(() => {
   if (store.commentaires?.titre) {
     const a = store.commentaires.titre.substring(0, 35);
@@ -223,8 +246,6 @@ onUpdated(() => {
     retrieveSourceData(navStore.selectedSourceID);
   }
   oldID.value = navStore.selectedSourceID;
-
-
 });
 
 // DataFetching of the selected Source(id)
@@ -235,11 +256,13 @@ async function retrieveSourceData(id) {
       fields: [
         "id,titre,type_de_source.*,meta,texte,content,editor_nodes.id,editor_nodes.item,editor_nodes.collection,commentaires.id,commentaires.type.id,commentaires.type.Nom,commentaires.titre,commentaires.content,commentaires.keywords_id.keywords_id.titre,commentaires.keywords_id.keywords_id.id,theme_id.titre,theme_id.id",
       ],
-      
     });
   });
 
-  injectDataIntoContent(source.value.data.editor_nodes, source.value.data.content)
+  injectDataIntoContent(
+    source.value.data.editor_nodes,
+    source.value.data.content
+  );
   //  Define renderers for relations
 
   store.sources[store.sources.findIndex((x) => x.id === id)] =
@@ -275,8 +298,6 @@ async function retrieveComments(id) {
   navStore.comVisibility = true;
   navStore.navVisibility = false;
 }
-
-
 
 const activeTabIndex = ref(0);
 

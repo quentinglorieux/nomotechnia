@@ -38,7 +38,14 @@ a {
   min-height: 100vh;
 }
 
-
+.homepage-container {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 1rem;
+  gap: 2rem;
+}
 .home-titre{
   display: flex;
   justify-content: center;
@@ -52,14 +59,78 @@ a {
   font-variant: small-caps;
 }
 
-.home-chapeau{
-  display: flex;
+.small-caps {
+  font-variant: small-caps;
+}
+
+.home-sidebar {
+  flex: 1 1 25%;
+  max-width: 25%;
+}
+/* Responsive (stack columns on small screens) */
+@media (max-width: 768px) {
+  .home-chapeau,
+  .home-sidebar {
+    max-width: 100%;
+    flex: 1 1 100%;
+  }
+}
+.home-chapeau {
+  flex: 1 1 72%;
+  max-width: 72%;
   margin: auto;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  max-width: 70%;
+  padding-left: 1em;
+  background-color: #fdfdfd;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  line-height: 1.6;
+  color: #333;
+}
+
+.home-chapeau h1 {
+  font-size: 1.5em;
+  color: #444;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.3em;
+}
+
+.home-chapeau h2 {
+  font-size: 1.5em;
+  margin-top: 1.5em;
+  color: #444;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.3em;
+}
+
+.home-chapeau h3 {
+  font-size: 1.3em;
+  margin-top: 1.5em;
+  color: #666;
+}
+.home-chapeau p {
+  margin: 0.8em 0;
+  font-size: 1.05em;
+}
+
+.home-chapeau ul {
+  // list-style: disc;
+  padding-left: 1.5em;
+  margin: 1em auto;
+  text-align: left;
+  // max-width: 600px;
+}
+
+.home-chapeau li {
+  margin: 0.5em 0;
+}
+
+.home-chapeau .highlight {
+  background-color: #f4f8fb;
+  border-left: 4px solid #005c99;
   padding: 1em;
+  margin-top: 2em;
+  text-align: left;
+  border-radius: 4px;
 }
 
 .theme-content{

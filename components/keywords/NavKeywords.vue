@@ -18,7 +18,7 @@
         selectionMode="single"
         dataKey="id"
         responsiveLayout="scroll"
-        class="p-datatable-ml"
+        class="p-datatable-sm"
         :scrollable="true"
         scrollHeight="flex"
         :resizableColumns="true"
@@ -51,7 +51,7 @@
         >
           <template #body="slotProps">
             <div
-              class="border-circle w-2rem h-2rem inline-flex font-bold justify-content-center align-items-center text-sm bg-slate-800 text-amber-50 hover:bg-slate-600"
+              class="border-circle w-2rem h-2rem inline-flex font-bold justify-content-center align-items-center text-sm bg-slate-300 text-slate-700 hover:bg-slate-400"
             >
               {{ slotProps.data.commentaires.length }}
             </div>
