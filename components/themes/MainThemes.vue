@@ -1,5 +1,5 @@
 <template>
-  <div class=" p-3 w-full">
+  <div class=" p-3 w-2/3 mx-auto">
     <div v-if="!theme">
       <h1>Sélectionnez un Theme</h1>
     </div>

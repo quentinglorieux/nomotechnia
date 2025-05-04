@@ -1,6 +1,6 @@
 <template>
     
-    <div class="p-3 mx-auto  mt-1 max-w-5xl"> 
+    <div class="p-3 mx-auto  mt-1 w-2/3"> 
       <div class="titre-page">
       <h1>Les auteurs </h1>
     </div>

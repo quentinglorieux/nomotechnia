@@ -22,6 +22,7 @@
     </ul>
 
     <template v-for="(tab, index) in tabList">
+    
       <div :key="index" v-if="index + 1 === activeTab">
         <slot :name="`tabPanel-${index + 1}`" />
       </div>

@@ -24,7 +24,7 @@
     </div>
     <div v-else>
       <div>
-        <div class="titre-page ">
+        <div class="titre-page">
           <div>
             <h1>{{ source.data.titre }}</h1>
             <p class="text-sm pl-4">{{ source.data.meta }}</p>
@@ -43,40 +43,47 @@
                 :relation-marks="relationMarks"
               />
 
-<!-- ✅ PDF Download Card (multiple files) -->
-<div
-  v-if="source?.data.fichiers?.length"
-  class="m-4 p-4 border border-gray-200 rounded-md bg-white shadow-sm"
->
-  <div class="mb-3">
-    <h3 class="text-lg font-semibold text-gray-800">
-      📄 Documents associés
-    </h3>
-    <p class="text-sm text-gray-600">
-      Cette source contient {{ source.data.fichiers.length }} document{{ source.data.fichiers.length > 1 ? 's' : '' }} joint{{ source.data.fichiers.length > 1 ? 's' : '' }}.
-    </p>
-  </div>
-  <ul class="space-y-2">
-    <li
-      v-for="(file, index) in source.data.fichiers"
-      :key="file.directus_files_id"
-      class="flex items-center justify-between bg-slate-50 p-3 rounded hover:bg-slate-100 transition"
-    >
-      <div class="text-sm text-gray-800">
-        {{ file.directus_files_id.filename_download || `Document ${index + 1}` }}
-      </div>
-      <a
-        :href="`${baseUrl}/assets/${file.directus_files_id.id}`"
-        target="_blank"
-        download
-        class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition"
-      >
-        <i class="pi pi-download mr-2"></i>
-        Télécharger
-      </a>
-    </li>
-  </ul>
-</div>
+              <!-- ✅ PDF Download Card (multiple files) -->
+              <div
+                v-if="source?.data.fichiers?.length"
+                class="m-4 p-4 border border-gray-200 rounded-md bg-white shadow-sm"
+              >
+                <div class="mb-3">
+                  <h3 class="text-lg font-semibold text-gray-800">
+                    📄 Documents associés
+                  </h3>
+                  <p class="text-sm text-gray-600">
+                    Cette source contient
+                    {{ source.data.fichiers.length }} document{{
+                      source.data.fichiers.length > 1 ? "s" : ""
+                    }}
+                    joint{{ source.data.fichiers.length > 1 ? "s" : "" }}.
+                  </p>
+                </div>
+                <ul class="space-y-2">
+                  <li
+                    v-for="(file, index) in source.data.fichiers"
+                    :key="file.directus_files_id"
+                    class="flex items-center justify-between bg-slate-50 p-3 rounded hover:bg-slate-100 transition"
+                  >
+                    <div class="text-sm text-gray-800">
+                      {{
+                        file.directus_files_id.filename_download ||
+                        `Document ${index + 1}`
+                      }}
+                    </div>
+                    <a
+                      :href="`${baseUrl}/assets/${file.directus_files_id.id}`"
+                      target="_blank"
+                      download
+                      class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition"
+                    >
+                      <i class="pi pi-download mr-2"></i>
+                      Télécharger
+                    </a>
+                  </li>
+                </ul>
+              </div>
 
               <ScrollTop
                 target="parent"
@@ -91,7 +98,23 @@
             <div class="split-menu">
               <div>
                 <TabView v-model:activeIndex="activeTabIndex">
-                  <!-- Onglet principal Commentaires -->
+                  <!-- BEFORE "Commentaires": types with position < Commentaire -->
+                  <TabPanel
+                    v-for="typeNom in commentTypesBefore"
+                    :key="'before-' + typeNom"
+                    :header="typeNom"
+                  >
+                    <div
+                      class="section"
+                      :id="typeNom.replace(/\s+/g, '-').toLowerCase()"
+                    >
+                      <SourceGenericComments
+                        :comments="getCommentsByType(typeNom)"
+                      />
+                    </div>
+                  </TabPanel>
+
+                  <!-- FIXED Commentaires -->
                   <TabPanel header="Commentaires">
                     <div class="section" id="comments"></div>
                     <SourceComments
@@ -101,22 +124,22 @@
                     />
                   </TabPanel>
 
-                  <!-- Onglet Mots-clés -->
+                  <!-- FIXED Mots-clés -->
                   <TabPanel header="Mots-clés">
                     <div class="section" id="keywords"></div>
                     <SourceKeywords :source="source" />
                   </TabPanel>
 
-                  <!-- Onglet Thèmes -->
+                  <!-- FIXED Thèmes -->
                   <TabPanel header="Thèmes">
                     <div class="section" id="themes"></div>
                     <SourceThemes :source="source" />
                   </TabPanel>
 
-                  <!-- Onglets dynamiques pour chaque type de commentaire -->
+                  <!-- AFTER "Thèmes": types with position > Commentaire -->
                   <TabPanel
-                    v-for="typeNom in commentTypes"
-                    :key="typeNom"
+                    v-for="typeNom in commentTypesAfter"
+                    :key="'after-' + typeNom"
                     :header="typeNom"
                   >
                     <div
@@ -150,7 +173,8 @@
                     <template #header>
                       {{ comTitre }}
                     </template>
-                    <ScrollPanel ref="scrollPanelRef"
+                    <ScrollPanel
+                      ref="scrollPanelRef"
                       style="
                         margin: 0.1rem;
                         height: 100%;
@@ -204,8 +228,8 @@ import RelatedComment from "./RelatedComment.vue";
 const navStore = useNavStore();
 const store = useGlobalStore();
 
-const config = useRuntimeConfig()
-const baseUrl = config.public.API_BASE_URL
+const config = useRuntimeConfig();
+const baseUrl = config.public.API_BASE_URL;
 
 const props = defineProps(["sourceID"]);
 const source = ref();
@@ -293,7 +317,7 @@ async function retrieveSourceData(id) {
   source.value = await useAsyncData(() => {
     return $directus.items("sources").readOne(id, {
       fields: [
-        "id,titre,type_de_source.*,meta,fichiers.directus_files_id.id,fichiers.directus_files_id.filename_download,texte,content,editor_nodes.id,editor_nodes.item,editor_nodes.collection,commentaires.id,commentaires.status,commentaires.type.id,commentaires.type.Nom,commentaires.titre,commentaires.content,commentaires.keywords_id.keywords_id.titre,commentaires.keywords_id.keywords_id.id,theme_id.titre,theme_id.id",
+        "id,titre,type_de_source.*,meta,fichiers.directus_files_id.id,fichiers.directus_files_id.filename_download,texte,content,editor_nodes.id,editor_nodes.item,editor_nodes.collection,commentaires.id,commentaires.status,commentaires.type.id,commentaires.type.sort,commentaires.type.Nom,commentaires.titre,commentaires.content,commentaires.keywords_id.keywords_id.titre,commentaires.keywords_id.keywords_id.id,theme_id.titre,theme_id.id",
       ],
     });
   });
@@ -362,12 +386,58 @@ watch(activeTabIndex, (newIndex) => {
   }
 });
 
+const commentairePosition = computed(() => {
+  const commentaire = source.value?.data?.commentaires.find(
+    (c) => c.type?.Nom === "Commentaire"
+  );
+  return commentaire?.type?.sort ?? 0;
+});
 
+const commentTypesBefore = computed(() => {
+  const raw = toRaw(source.value?.data?.commentaires || []);
+
+  const entries = raw
+    .filter((c) => c.type?.Nom !== "Commentaire")
+    .map((c) => ({
+      nom: c.type.Nom,
+      pos: c.type.sort ?? 999,
+    }));
+
+  const unique = new Map();
+  entries.forEach(({ nom, pos }) => {
+    if (!unique.has(nom)) unique.set(nom, pos);
+  });
+
+  return Array.from(unique.entries())
+    .filter(([_, pos]) => pos < commentairePosition.value)
+    .sort((a, b) => a[1] - b[1])
+    .map(([nom]) => nom);
+});
+
+const commentTypesAfter = computed(() => {
+  const raw = toRaw(source.value?.data?.commentaires || []);
+
+  const entries = raw
+    .filter((c) => c.type?.Nom !== "Commentaire")
+    .map((c) => ({
+      nom: c.type.Nom,
+      pos: c.type.sort ?? 999,
+    }));
+
+  const unique = new Map();
+  entries.forEach(({ nom, pos }) => {
+    if (!unique.has(nom)) unique.set(nom, pos);
+  });
+
+  return Array.from(unique.entries())
+    .filter(([_, pos]) => pos > commentairePosition.value)
+    .sort((a, b) => a[1] - b[1])
+    .map(([nom]) => nom);
+});
 </script>
 
 <style>
 .p-tabview .p-tabview-panels {
   padding: 0;
 }
-
 </style>

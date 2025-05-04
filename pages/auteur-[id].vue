@@ -1,6 +1,6 @@
 <template>
   <div v-if="!author">Chargement en cours</div>
-  <div v-else class="p-3 mx-auto mt-1">
+  <div v-else class="p-3 w-2/3 mx-auto mt-1">
     <div class="titre-page mx-2">
       <h1>{{ author.first_name + " " + author.last_name }}</h1>
     </div>
