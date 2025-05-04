@@ -43,6 +43,41 @@
                 :relation-marks="relationMarks"
               />
 
+<!-- ✅ PDF Download Card (multiple files) -->
+<div
+  v-if="source?.data.fichiers?.length"
+  class="m-4 p-4 border border-gray-200 rounded-md bg-white shadow-sm"
+>
+  <div class="mb-3">
+    <h3 class="text-lg font-semibold text-gray-800">
+      📄 Documents associés
+    </h3>
+    <p class="text-sm text-gray-600">
+      Cette source contient {{ source.data.fichiers.length }} document{{ source.data.fichiers.length > 1 ? 's' : '' }} joint{{ source.data.fichiers.length > 1 ? 's' : '' }}.
+    </p>
+  </div>
+  <ul class="space-y-2">
+    <li
+      v-for="(file, index) in source.data.fichiers"
+      :key="file.directus_files_id"
+      class="flex items-center justify-between bg-slate-50 p-3 rounded hover:bg-slate-100 transition"
+    >
+      <div class="text-sm text-gray-800">
+        {{ file.directus_files_id.filename_download || `Document ${index + 1}` }}
+      </div>
+      <a
+        :href="`${baseUrl}/assets/${file.directus_files_id.id}`"
+        target="_blank"
+        download
+        class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition"
+      >
+        <i class="pi pi-download mr-2"></i>
+        Télécharger
+      </a>
+    </li>
+  </ul>
+</div>
+
               <ScrollTop
                 target="parent"
                 :threshold="100"
@@ -169,6 +204,9 @@ import RelatedComment from "./RelatedComment.vue";
 const navStore = useNavStore();
 const store = useGlobalStore();
 
+const config = useRuntimeConfig()
+const baseUrl = config.public.API_BASE_URL
+
 const props = defineProps(["sourceID"]);
 const source = ref();
 
@@ -254,7 +292,7 @@ async function retrieveSourceData(id) {
   source.value = await useAsyncData(() => {
     return $directus.items("sources").readOne(id, {
       fields: [
-        "id,titre,type_de_source.*,meta,texte,content,editor_nodes.id,editor_nodes.item,editor_nodes.collection,commentaires.id,commentaires.type.id,commentaires.type.Nom,commentaires.titre,commentaires.content,commentaires.keywords_id.keywords_id.titre,commentaires.keywords_id.keywords_id.id,theme_id.titre,theme_id.id",
+        "id,titre,type_de_source.*,meta,fichiers.directus_files_id.id,fichiers.directus_files_id.filename_download,texte,content,editor_nodes.id,editor_nodes.item,editor_nodes.collection,commentaires.id,commentaires.type.id,commentaires.type.Nom,commentaires.titre,commentaires.content,commentaires.keywords_id.keywords_id.titre,commentaires.keywords_id.keywords_id.id,theme_id.titre,theme_id.id",
       ],
     });
   });
