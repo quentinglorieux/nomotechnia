@@ -1,9 +1,9 @@
 <template>
     <div class="p-3 pt-4">
-      <li
+      <li 
         v-for="com in comments"
         :key="com.id"
-        class="mb-2"
+        class="mb-2 no-marker-li"
       >
         <div class="flex items-center p-1">
           <template v-if="comments.length === 1">

@@ -288,14 +288,22 @@ onUpdated(() => {
 
 // DataFetching of the selected Source(id)
 const { $directus } = useNuxtApp();
+
 async function retrieveSourceData(id) {
   source.value = await useAsyncData(() => {
     return $directus.items("sources").readOne(id, {
       fields: [
-        "id,titre,type_de_source.*,meta,fichiers.directus_files_id.id,fichiers.directus_files_id.filename_download,texte,content,editor_nodes.id,editor_nodes.item,editor_nodes.collection,commentaires.id,commentaires.type.id,commentaires.type.Nom,commentaires.titre,commentaires.content,commentaires.keywords_id.keywords_id.titre,commentaires.keywords_id.keywords_id.id,theme_id.titre,theme_id.id",
+        "id,titre,type_de_source.*,meta,fichiers.directus_files_id.id,fichiers.directus_files_id.filename_download,texte,content,editor_nodes.id,editor_nodes.item,editor_nodes.collection,commentaires.id,commentaires.status,commentaires.type.id,commentaires.type.Nom,commentaires.titre,commentaires.content,commentaires.keywords_id.keywords_id.titre,commentaires.keywords_id.keywords_id.id,theme_id.titre,theme_id.id",
       ],
     });
   });
+
+  // ✅ Filter only published commentaires
+  if (source.value?.data?.commentaires) {
+    source.value.data.commentaires = source.value.data.commentaires.filter(
+      (c) => c.status === "published"
+    );
+  }
 
   injectDataIntoContent(
     source.value.data.editor_nodes,
@@ -328,14 +336,14 @@ const kwSelectectComment = computed(() => {
   return dataSelectedComment ? dataSelectedComment.keywords_id : [];
 });
 
-async function retrieveComments(id) {
-  const { data } = await useAsyncData(() => {
-    return $directus.items("commentaires").readOne(id);
-  });
-  store.commentaires = data.value;
-  navStore.comVisibility = true;
-  navStore.navVisibility = false;
-}
+// async function retrieveComments(id) {
+//   const { data } = await useAsyncData(() => {
+//     return $directus.items("commentaires").readOne(id);
+//   });
+//   store.commentaires = data.value;
+//   navStore.comVisibility = true;
+//   navStore.navVisibility = false;
+// }
 
 const activeTabIndex = ref(0);
 
@@ -361,4 +369,5 @@ watch(activeTabIndex, (newIndex) => {
 .p-tabview .p-tabview-panels {
   padding: 0;
 }
+
 </style>

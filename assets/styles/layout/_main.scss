@@ -6,13 +6,13 @@
   box-shadow: none !important;
 }
 
-ul {
-  list-style-type: none;
-}
+// ul {
+//   list-style-type: none;
+// }
 
-li {
-  list-style-type: none;
-}
+// li {
+//   list-style-type: none;
+// }
 
 html {
   height: 100%;
@@ -344,4 +344,16 @@ a {
 
 .p-tabview-header-p-highlight a:hover{
   overflow: visible;
+}
+
+.no-marker-ul ul,
+.no-marker-ol ol {
+  list-style: none ;
+  padding-left: 0 ;
+  margin-left: 0 ;
+}
+
+.no-marker-li {
+  list-style: none ;
+  margin-bottom: 0.5rem;
 }

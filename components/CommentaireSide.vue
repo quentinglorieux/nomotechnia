@@ -31,7 +31,7 @@
         <div class="p-2" v-html="fetched_data.abstract"></div>
       </div>
 
-      <div class="pt-3 px-2 m-2" v-html="parsedHTML"></div>
+      <div class="pt-3 px-2 m-2 disp-commentaire" v-html="fetched_data.content"></div>
 
       <div
         v-if="store.commentaires.references"
@@ -148,10 +148,32 @@ watch(prop, () => {
 });
 </script>
 
-<style scoped>
-li {
-  list-style-type: none;
+<style>
+
+.disp-commentaire ul,
+.disp-commentaire ol {
+  margin-left: 1.25rem;
+  padding-left: 1.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }
+
+.disp-commentaire ul {
+  list-style-type: disc;
+}
+
+.disp-commentaire ol {
+  list-style-type: decimal;
+}
+
+.disp-commentaire li {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+  color: #374151; /* Tailwind gray-700 */
+  font-size: 0.95rem;
+}
+
+
 #ref1 {
   scroll-behavior: smooth;
 }

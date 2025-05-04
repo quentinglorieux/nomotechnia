@@ -1,6 +1,7 @@
 <template>
   <div class="p-3 pt-4">
-    <li v-for="com in commentairesSimples">
+    <li class="no-marker-li" v-for="com in commentairesSimples">
+  
       <div class="flex p-1">
         <Button
           rounded
@@ -47,3 +48,19 @@ const commentairesSimples = computed(() => {
   );
 });
 </script>
+
+<style>
+
+.no-marker-ul ul,
+.no-marker-ol ol {
+  list-style: none !important;
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+}
+
+.no-marker-li li {
+  display: block !important;
+  list-style: none !important;
+  margin-bottom: 0.5rem;
+}
+  </style>
