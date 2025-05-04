@@ -66,7 +66,7 @@ const items = ref([
 async function retrieveAuthors() {
   const { data: publicData } = await useAsyncData(() => {
     return $directus.items("directus_users").readByQuery({
-      fields: ["*"],
+      fields: ["id,first_name,last_name,role,avatar,email,commentaires.status,commentaires.id,short_cv"],
       filter: {
         role: {
           _starts_with: "aeeefb57-7b36",
@@ -75,7 +75,17 @@ async function retrieveAuthors() {
     });
   });
 
-  store.authors = publicData.value.data;
+
+  // Safety: fallback if no data
+  const allUsers = publicData.value?.data || [];
+
+  // Filter only those with at least one published commentaire
+  const filtered = allUsers.filter((user) =>
+    user.commentaires?.some((c) => c.status === "published")
+  );
+
+  // Update your store with the filtered list
+  store.authors = filtered;
 
   items.value[4].items.push({
     label: " - Tous les auteurs - ",

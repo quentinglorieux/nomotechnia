@@ -19,6 +19,9 @@ const store = useGlobalStore();
 const { $directus } = useNuxtApp();
 const listItems = ref([]);
 
+
+// loooks like this is not used
+
 async function retrieveAuthors() {
   const { data: publicData } = await useAsyncData(() => {
     return $directus.items("directus_users").readByQuery({
@@ -30,6 +33,7 @@ async function retrieveAuthors() {
       },
     });
   });
+
   store.authors = publicData.value.data;
 
   var L = publicData.value.data;

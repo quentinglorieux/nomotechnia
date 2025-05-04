@@ -119,11 +119,11 @@ const items = ref([
     icon: "pi pi-fw pi-tags",
     to: "/keywords",
   },
-  {
-    label: "Thèmes",
-    icon: "pi pi-fw pi-list",
-    to: "/themes",
-  },
+  // {
+  //   label: "Thèmes",
+  //   icon: "pi pi-fw pi-list",
+  //   to: "/themes",
+  // },
   {
     label: "Auteurs",
     icon: "pi pi-fw pi-users",
