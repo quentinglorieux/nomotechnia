@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-column w-full">
-    <div class="card2 bg-slate-100" v-if="!source">
-      <h2>Sélectionnez une Source</h2>
+    <div class="card2 bg-slate-100 w-1/2 ml-6 mt-3" v-if="!source">
+      <h3>Sélectionnez une Source</h3>
       <div class="text-gray-700 leading-relaxed text-justify max-w-3xl">
         Cette section répertorie les principales
         <strong>décisions de justice britanniques</strong> analysées sur

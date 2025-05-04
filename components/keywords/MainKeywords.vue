@@ -2,8 +2,8 @@
   <div class="w-full">
     <div class="flex flex-column p-1 w-full">
       <!-- {{ navStore.selectedKeywordID }} -->
-      <div class="card2 bg-slate-100" v-if="!kw">
-        <h2>Navigation par Mot-clés</h2>
+      <div class="card2 bg-slate-100 w-1/2 ml-6 mt-3" v-if="!kw">
+        <h3>Navigation par Mot-clés</h3>
 <div class="text-justify leading-relaxed text-gray-700">
   Cette section vous permet d’explorer les grands arrêts britanniques à travers une sélection de <strong>mots-clés juridiques</strong>. 
   Chaque mot-clé regroupe des commentaires associés à des décisions majeures, offrant une lecture transversale des enjeux doctrinaux et jurisprudentiels.
