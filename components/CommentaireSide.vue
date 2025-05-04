@@ -8,6 +8,7 @@
       <h1 class="flex justify-between">
         <div class="px-2">
           <h1 class="">{{ fetched_data.titre }}</h1>
+          <p class="text-sm pl-3">{{ fetched_data.meta }}</p>
         </div>
         <div class="mt-1">
           <Button
@@ -102,6 +103,7 @@ async function retrieveCommentData(id) {
         "auteur_type",
         "auteur_name",
         "references",
+        "meta",
       ],
     })
   );

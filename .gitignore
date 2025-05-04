@@ -8,3 +8,4 @@ node_modules
 dist
 todo.md
 .DS_Store
+nuxt.config.ts

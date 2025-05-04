@@ -27,7 +27,7 @@
         <div class="titre-page">
           <div>
             <h1>{{ source.data.titre }}</h1>
-            <p class="pl-4">{{ source.data.meta }}</p>
+            <p class="text-sm pl-4">{{ source.data.meta }}</p>
           </div>
 
           <p v-if="source.data">[{{ source.data.type_de_source.Nom }}]</p>
