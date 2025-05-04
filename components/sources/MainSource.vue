@@ -24,7 +24,7 @@
     </div>
     <div v-else>
       <div>
-        <div class="titre-page">
+        <div class="titre-page ">
           <div>
             <h1>{{ source.data.titre }}</h1>
             <p class="text-sm pl-4">{{ source.data.meta }}</p>
@@ -35,7 +35,7 @@
 
         <Splitter>
           <SplitterPanel :size="60" class="">
-            <ScrollPanel>
+            <ScrollPanel class="mt-4">
               <FlexibleEditorContent
                 class="p-3"
                 v-if="source?.data.content"
@@ -150,7 +150,7 @@
                     <template #header>
                       {{ comTitre }}
                     </template>
-                    <ScrollPanel
+                    <ScrollPanel ref="scrollPanelRef"
                       style="
                         margin: 0.1rem;
                         height: 100%;
@@ -354,7 +354,7 @@ watch(activeTabIndex, (newIndex) => {
   }
 });
 
-// 2. Inject node data into the editor content
+
 </script>
 
 <style>

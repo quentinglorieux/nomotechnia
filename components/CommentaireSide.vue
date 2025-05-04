@@ -31,13 +31,13 @@
         <div class="p-2" v-html="fetched_data.abstract"></div>
       </div>
 
-      <div class="pt-3 px-2 m-2" v-html="parsedMarkdown"></div>
+      <div class="pt-3 px-2 m-2" v-html="parsedHTML"></div>
 
       <div
         v-if="store.commentaires.references"
         class="bg-slate-200 p-2 mt-10 m-2 rounded"
       >
-        <h3 class="px-2">Références :</h3>
+        <h3 id="references" class="px-2">Références :</h3>
         <div>
           <ul class="px-2 pb-3">
             <li v-for="ref in store.commentaires.references">
@@ -60,7 +60,7 @@
 </template>
 
 <script setup>
-import MarkdownIt from "markdown-it";
+// import MarkdownIt from "markdown-it";
 import { exportToPDF } from "#imports";
 const pdfSection = (ref < HTMLElement) | (null > null);
 
@@ -86,8 +86,9 @@ const options = {
 };
 
 const fetched_data = ref();
-const md = new MarkdownIt({ html: true });
-const parsedMarkdown = ref();
+// const md = new MarkdownIt({ html: true });
+// const parsedMarkdown = ref();
+const parsedHTML = ref();
 
 // DataFetching of the selected Commentaires(id)
 const { $directus } = useNuxtApp();
@@ -110,7 +111,9 @@ async function retrieveCommentData(id) {
 
   if (data.value) {
     fetched_data.value = data.value;
-    parsedMarkdown.value = md.render(data.value.content || "");
+    parsedHTML.value = data.value.content
+    // for markdown
+    // parsedMarkdown.value = md.render(data.value.content || "");
     // console.log("fetched_data", fetched_data.value);
     store.commentaires.titre = data.value.titre;
     store.commentaires.references = data.value.references;
@@ -120,7 +123,25 @@ async function retrieveCommentData(id) {
 onMounted(() => {
   // console.log(prop.com);
   retrieveCommentData(prop.com);
+
+  const hash = window.location.hash
+  if (hash) {
+    const el = document.querySelector(hash)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' }) // or instant
+    }
+  }
+  const target = document.querySelector('#references')
+if (target) {
+  const scrollParent = document.querySelector('.p-scrollpanel-content')
+  if (scrollParent) {
+    const offset = target.offsetTop
+    scrollParent.scrollTo({ top: offset, behavior: 'smooth' })
+  }
+}
 });
+
+
 
 watch(prop, () => {
   retrieveCommentData(prop.com);
