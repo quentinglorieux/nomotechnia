@@ -30,9 +30,9 @@
 
       <div class="home-chapeau">
         <div>
-          <h1>📘 Qu’est-ce que Nomotechnia ?</h1>
+          <h1>Qu’est-ce que Nomotechnia ?</h1>
           <p>
-            🏛️
+            
             <em>Lire, comprendre, commenter les grands arrêts britanniques</em>
           </p>
           <p>
@@ -69,7 +69,7 @@
             </li>
           </ul>
 
-          <h2>🧭 Pour commencer</h2>
+          <h2>Pour commencer</h2>
           <ul>
             <li>
               <strong>Explorer les grands arrêts</strong> par date, juridiction
@@ -79,7 +79,7 @@
             <li><strong>Rechercher par mot-clé ou thème</strong></li>
           </ul>
 
-          <h2>🤝 Contribuer</h2>
+          <h2>Contribuer</h2>
           <p>
             Juriste, enseignant, étudiant ? Vous pouvez
             <strong>proposer un commentaire</strong>,
@@ -87,7 +87,7 @@
             <strong>corriger une fiche existante</strong>.
           </p>
 
-          <h3 style="margin-top: 2em">📚 Pourquoi ce projet ?</h3>
+          <h3 style="margin-top: 2em">Pourquoi ce projet ?</h3>
           <p>
             Parce que le <strong>droit est vivant</strong>, et que sa
             compréhension passe par un dialogue critique avec la jurisprudence.
