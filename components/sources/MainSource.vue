@@ -1,401 +1,322 @@
 <template>
-  <div class="flex flex-column w-full">
-    <div class="card2 bg-slate-100 w-1/2 ml-6 mt-3" v-if="!source">
-      <h3>Sélectionnez une Source</h3>
-      <div class="text-gray-700 leading-relaxed text-justify max-w-3xl">
-        Cette section répertorie les principales
-        <strong>décisions de justice britanniques</strong> analysées sur
-        Nomotechnia.
-
-        <br /><br />
-        Vous y trouverez des arrêts sélectionnés pour leur portée doctrinale,
-        leur intérêt pédagogique ou leur valeur fondatrice.
-
-        <br /><br />
-        Cliquez sur une source pour accéder à sa fiche complète. Celle-ci inclut
-        le texte de l’arrêt, des commentaires associés, les notions juridiques
-        mobilisées, ainsi que des liens vers les auteurs ou d'autres arrêts
-        connexes.
-
-        <br /><br />
-        Vous pouvez aussi explorer les sources via les mots-clés ou les grands
-        thèmes accessibles depuis la page d’accueil.
+  <div class="flex flex-col w-full h-full min-h-0 overflow-hidden">
+    <!-- Info Section if no source selected -->
+    <div v-if="!source" class="m-6 p-6 bg-slate-100 dark:bg-gray-800 rounded-lg shadow-sm border border-slate-200 dark:border-gray-700 lg:w-1/2">
+      <h3 class="text-xl font-bold text-slate-800 dark:text-gray-100 mb-4">Sélectionnez une Source</h3>
+      <div class="text-slate-700 dark:text-gray-300 leading-relaxed text-justify prose dark:prose-invert max-w-none">
+        <p>
+          Cette section répertorie les principales
+          <strong>décisions de justice britanniques</strong> analysées sur
+          Nomotechnia.
+        </p>
+        <p>
+          Vous y trouverez des arrêts sélectionnés pour leur portée doctrinale,
+          leur intérêt pédagogique ou leur valeur fondatrice.
+        </p>
+        <p>
+          Cliquez sur une source pour accéder à sa fiche complète. Celle-ci inclut
+          le texte de l’arrêt, des commentaires associés, les notions juridiques
+          mobilisées, ainsi que des liens vers les auteurs ou d'autres arrêts
+          connexes.
+        </p>
+        <p>
+          Vous pouvez aussi explorer les sources via les mots-clés ou les grands
+          thèmes accessibles depuis la page d’accueil.
+        </p>
       </div>
     </div>
-    <div v-else>
-      <div>
-        <div class="titre-page">
-          <div>
-            <h1>{{ source.data.titre }}</h1>
-            <p class="text-sm pl-4">{{ source.data.meta }}</p>
-          </div>
 
-          <p v-if="source.data">[{{ source.data.type_de_source.Nom }}]</p>
+    <!-- Main Source Display -->
+    <div v-else class="flex flex-col h-full min-h-0 overflow-hidden">
+      <div class="px-6 py-4 bg-white dark:bg-gray-900 border-b border-slate-200 dark:border-gray-800">
+        <div class="flex justify-between items-center">
+          <div>
+            <h1 class="text-3xl font-bold text-slate-900 dark:text-white">{{ source.data.titre }}</h1>
+            <p v-if="source.data.meta" class="text-sm text-slate-500 dark:text-gray-400 mt-1">{{ source.data.meta }}</p>
+          </div>
+          <UBadge v-if="source.data.type_de_source" color="neutral" variant="soft">
+            {{ source.data.type_de_source.Nom }}
+          </UBadge>
+        </div>
+      </div>
+
+      <!-- Main Content Split view -->
+      <div class="flex flex-1 min-h-0 overflow-hidden" ref="splitContainer">
+        <!-- Left Pane: Content (resizable) -->
+        <div class="border-r border-slate-200 dark:border-gray-800 flex flex-col" :style="leftPaneStyle">
+          <UScrollArea class="flex-1 p-6 relative">
+            <FlexibleEditorContent
+              v-if="source?.data.content"
+              class="prose dark:prose-invert max-w-none"
+              :content="source.data.content"
+              :relation-marks="relationMarks"
+            />
+
+            <!-- PDF Download Card -->
+            <UCard v-if="source?.data.fichiers?.length" class="mt-8">
+              <template #header>
+                <div class="flex items-center gap-2">
+                  <UIcon name="i-lucide-file-text" class="w-5 h-5 text-slate-500 dark:text-gray-400" />
+                  <h3 class="text-lg font-semibold dark:text-white">Documents associés</h3>
+                </div>
+              </template>
+              
+              <ul class="space-y-2">
+                <li
+                  v-for="(file, index) in source.data.fichiers"
+                  :key="file.directus_files_id"
+                  class="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-gray-800/50 hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <span class="text-sm font-medium text-slate-700 dark:text-gray-300">
+                    {{ file.directus_files_id.filename_download || `Document ${index + 1}` }}
+                  </span>
+                  <UButton
+                    :to="`${baseUrl}/assets/${file.directus_files_id.id}`"
+                    target="_blank"
+                    download
+                    icon="i-lucide-download"
+                    label="Télécharger"
+                    size="xs"
+                    color="neutral"
+                    variant="soft"
+                  />
+                </li>
+              </ul>
+            </UCard>
+          </UScrollArea>
         </div>
 
-        <Splitter>
-          <SplitterPanel :size="60" class="">
-            <ScrollPanel class="mt-4">
-              <FlexibleEditorContent
-                class="p-3"
-                v-if="source?.data.content"
-                :content="source.data.content"
-                :relation-marks="relationMarks"
-              />
+        <!-- Draggable Separator -->
+        <div
+          class="w-2 cursor-col-resize bg-slate-200/80 hover:bg-primary-400 dark:bg-gray-700 dark:hover:bg-primary-600 transition-colors"
+          @mousedown="startResize"
+          role="separator"
+          aria-label="Redimensionner les panneaux"
+          aria-orientation="vertical"
+        />
 
-              <!-- ✅ PDF Download Card (multiple files) -->
-              <div
-                v-if="source?.data.fichiers?.length"
-                class="m-4 p-4 border border-gray-200 rounded-md bg-white shadow-sm"
-              >
-                <div class="mb-3">
-                  <h3 class="text-lg font-semibold text-gray-800">
-                    📄 Documents associés
-                  </h3>
-                  <p class="text-sm text-gray-600">
-                    Cette source contient
-                    {{ source.data.fichiers.length }} document{{
-                      source.data.fichiers.length > 1 ? "s" : ""
-                    }}
-                    joint{{ source.data.fichiers.length > 1 ? "s" : "" }}.
-                  </p>
-                </div>
-                <ul class="space-y-2">
-                  <li
-                    v-for="(file, index) in source.data.fichiers"
-                    :key="file.directus_files_id"
-                    class="flex items-center justify-between bg-slate-50 p-3 rounded hover:bg-slate-100 transition"
-                  >
-                    <div class="text-sm text-gray-800">
-                      {{
-                        file.directus_files_id.filename_download ||
-                        `Document ${index + 1}`
-                      }}
-                    </div>
-                    <a
-                      :href="`${baseUrl}/assets/${file.directus_files_id.id}`"
-                      target="_blank"
-                      download
-                      class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition"
-                    >
-                      <i class="pi pi-download mr-2"></i>
-                      Télécharger
-                    </a>
-                  </li>
-                </ul>
-              </div>
-
-              <ScrollTop
-                target="parent"
-                :threshold="100"
-                class="custom-scrolltop"
-                icon="pi pi-arrow-up"
-              />
-            </ScrollPanel>
-          </SplitterPanel>
-
-          <SplitterPanel :size="40">
-            <div class="split-menu">
-              <div>
-                <TabView v-model:activeIndex="activeTabIndex">
-                  <!-- BEFORE "Commentaires": types with position < Commentaire -->
-                  <TabPanel
-                    v-for="typeNom in commentTypesBefore"
-                    :key="'before-' + typeNom"
-                    :header="typeNom"
-                  >
-                    <div
-                      class="section"
-                      :id="typeNom.replace(/\s+/g, '-').toLowerCase()"
-                    >
-                      <SourceGenericComments
-                        :comments="getCommentsByType(typeNom)"
-                      />
-                    </div>
-                  </TabPanel>
-
-                  <!-- FIXED Commentaires -->
-                  <TabPanel header="Commentaires">
-                    <div class="section" id="comments"></div>
+        <!-- Right Pane: Tabs and Details (resizable) -->
+        <div class="flex flex-col bg-slate-50 dark:bg-gray-950 min-h-0 overflow-hidden" :style="rightPaneStyle">
+          <div class="flex-1 flex flex-col min-h-0 overflow-hidden relative">
+            <!-- Source Tabs -->
+            <UTabs :items="sourceTabs" v-model:active-index="activeTabIndex" class="flex-1 flex flex-col overflow-hidden min-h-0">
+              <template #content="{ item }">
+                <div class="flex-1 p-4 min-h-0 overflow-y-auto">
+                  <div v-if="item.slot === 'before-tabs'">
+                    <SourceGenericComments :comments="getCommentsByType(item.label)" />
+                  </div>
+                  
+                  <div v-else-if="item.slot === 'main-comments'">
                     <SourceComments
-                      v-if="store.commentaires"
+                      v-if="source?.data?.commentaires"
                       :source="source"
-                      :comSelected="store.commentaires"
+                      :comSelected="globalState.commentaires"
                     />
-                  </TabPanel>
+                  </div>
 
-                  <!-- FIXED Mots-clés -->
-                  <TabPanel header="Mots-clés">
-                    <div class="section" id="keywords"></div>
+                  <div v-else-if="item.slot === 'keywords'">
                     <SourceKeywords :source="source" />
-                  </TabPanel>
+                  </div>
 
-                  <!-- FIXED Thèmes -->
-                  <TabPanel header="Thèmes">
-                    <div class="section" id="themes"></div>
+                  <div v-else-if="item.slot === 'themes'">
                     <SourceThemes :source="source" />
-                  </TabPanel>
+                  </div>
 
-                  <!-- AFTER "Thèmes": types with position > Commentaire -->
-                  <TabPanel
-                    v-for="typeNom in commentTypesAfter"
-                    :key="'after-' + typeNom"
-                    :header="typeNom"
-                  >
-                    <div
-                      class="section"
-                      :id="typeNom.replace(/\s+/g, '-').toLowerCase()"
-                    >
-                      <SourceGenericComments
-                        :comments="getCommentsByType(typeNom)"
-                      />
-                    </div>
-                  </TabPanel>
-                </TabView>
-              </div>
-              <div class="source-commentaire" v-if="navStore.comVisibility">
-                <div class="close-button bg-slate-200 rounded pl-1 py-0 m-2">
-                  <Button
-                    icon="pi pi-times"
-                    text
-                    rounded
-                    @click="
-                      () => {
-                        navStore.comVisibility = false;
-                        // store.commentaires = {};
-                      }
-                    "
-                  >
-                  </Button>
+                  <div v-else-if="item.slot === 'after-tabs'">
+                    <SourceGenericComments :comments="getCommentsByType(item.label)" />
+                  </div>
                 </div>
-                <TabView>
-                  <TabPanel>
-                    <template #header>
-                      {{ comTitre }}
-                    </template>
-                    <ScrollPanel
-                      ref="scrollPanelRef"
-                      style="
-                        margin: 0.1rem;
-                        height: 100%;
-                        background-color: white;
-                      "
-                    >
-                      <div class="p-3">
-                        <CommentaireSide
-                          :com="navStore.comID"
-                        ></CommentaireSide>
-                      </div>
-                      <ScrollTop
-                        target="parent"
-                        :threshold="100"
-                        style="
-                          .p-scrolltop {
-                            position: sticky;
-                            bottom: 60px;
-                          }
-                        "
-                        icon="pi pi-arrow-up"
-                      />
-                    </ScrollPanel>
-                  </TabPanel>
-                  <TabPanel>
-                    <template #header>
-                      <span>Mots-clés associés</span>
-                    </template>
-                    <ScrollPanel class="pr-20">
-                      <CommentsKeywords
-                        :kwList="kwSelectectComment"
-                      ></CommentsKeywords>
-                    </ScrollPanel>
-                  </TabPanel>
-                </TabView>
+              </template>
+            </UTabs>
+
+            <!-- Selected Comment Detail Overlay -->
+            <div 
+              v-if="navState.comVisibility" 
+              class="absolute inset-x-0 bottom-0 top-0 bg-white dark:bg-gray-900 z-10 border-t border-slate-200 dark:border-gray-800 flex flex-col min-h-0 shadow-2xl transition-all duration-300 transform translate-y-0"
+            >
+              <div class="flex items-center justify-between p-2 border-b border-slate-100 dark:border-gray-800 bg-slate-50 dark:bg-gray-950">
+                <div class="truncate font-semibold px-2 text-slate-700 dark:text-gray-200">
+                  {{ comTitre }}
+                </div>
+                <UButton
+                  icon="i-lucide-x"
+                  color="neutral"
+                  variant="ghost"
+                  size="sm"
+                  @click="navState.comVisibility = false"
+                />
               </div>
+
+              <UTabs :items="commentDetailTabs" class="flex-1 flex flex-col overflow-hidden min-h-0">
+                <template #content="{ item }">
+                  <div class="flex-1 p-4 min-h-0 overflow-y-auto">
+                    <div v-if="item.slot === 'content'">
+                      <CommentaireSide :com="navState.comID" />
+                    </div>
+                    <div v-else-if="item.slot === 'keywords'">
+                      <CommentsKeywords :kwList="kwSelectectComment" />
+                    </div>
+                  </div>
+                </template>
+              </UTabs>
             </div>
-          </SplitterPanel>
-        </Splitter>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useNavStore } from "@/stores/navigation";
-import { useGlobalStore } from "~/stores/global";
 import { injectDataIntoContent } from "directus-extension-flexible-editor/content";
 import FlexibleEditorContent from "directus-extension-flexible-editor/content/vue";
 import RelatedComment from "./RelatedComment.vue";
-const navStore = useNavStore();
-const store = useGlobalStore();
+import SourceGenericComments from "./SourceGenericComments.vue";
+import SourceComments from "./SourceComments.vue";
+import SourceKeywords from "./SourceKeywords.vue";
+import SourceThemes from "./SourceThemes.vue";
+import CommentaireSide from "../CommentaireSide.vue";
+import CommentsKeywords from "./CommentsKeywords.vue";
 
+const navState = useNavState();
+const globalState = useGlobalState();
 const config = useRuntimeConfig();
 const baseUrl = config.public.API_BASE_URL;
+const { $directus } = useNuxtApp();
 
 const props = defineProps(["sourceID"]);
 const source = ref();
-
-// Liste des types uniques de commentaires pour la source sélectionnée
-const commentTypes = computed(() => {
-  if (!source.value || !source.value.data || !source.value.data.commentaires) {
-    return [];
-  }
-
-  const rawCommentaires = toRaw(source.value.data.commentaires);
-
-  const types = rawCommentaires
-    .map((c) => c.type?.Nom)
-    .filter(
-      (nom, index, self) =>
-        nom &&
-        nom.toLowerCase() !== "commentaire" && // Exclude fixed tab
-        self.indexOf(nom) === index
-    );
-
-  return types;
-});
-
-const commentTypesId = computed(() => {
-  if (!source.value || !source.value.data || !source.value.data.commentaires) {
-    return [];
-  }
-
-  const rawCommentaires = toRaw(source.value.data.commentaires);
-
-  const types = rawCommentaires
-    .map((c) => c.type?.id)
-    .filter((id, index, self) => id && self.indexOf(id) === index);
-
-  return types;
-});
-
-// Retourne tous les commentaires correspondant à un type donné
-function getCommentsByType(typeNom) {
-  if (!source.value || !source.value.data || !source.value.data.commentaires) {
-    return [];
-  }
-  const rawCommentaires = toRaw(source.value.data.commentaires);
-  return rawCommentaires.filter((c) => c.type?.Nom === typeNom);
-}
-
-function getCommentsByID(typeNom) {
-  if (!source.value || !source.value.data || !source.value.data.commentaires) {
-    return [];
-  }
-  const rawCommentaires = toRaw(source.value.data.commentaires);
-  return rawCommentaires.filter((c) => c.type?.id === typeNom);
-}
-
 const oldID = ref();
+const activeTabIndex = ref(2); // Default to 'Commentaires' tab
+const splitContainer = ref(null);
+const leftPaneWidth = ref(60);
+const isResizing = ref(false);
+
+const leftPaneStyle = computed(() => ({
+  flexBasis: `${leftPaneWidth.value}%`,
+  minWidth: '320px',
+}));
+
+const rightPaneStyle = computed(() => ({
+  flexBasis: `${100 - leftPaneWidth.value}%`,
+  minWidth: '320px',
+}));
+
+// Tab items for the source (right pane)
+const sourceTabs = computed(() => {
+  const tabs = [];
+  
+  // Before tabs
+  commentTypesBefore.value.forEach(typeNom => {
+    tabs.push({ label: typeNom, slot: 'before-tabs', value: `before-${typeNom}` });
+  });
+
+  // Main tabs
+  tabs.push({ label: 'Commentaires', slot: 'main-comments', value: 2 });
+  tabs.push({ label: 'Mots-clés', slot: 'keywords', value: 3 });
+  tabs.push({ label: 'Thèmes', slot: 'themes', value: 4 });
+
+  // After tabs
+  commentTypesAfter.value.forEach(typeNom => {
+    tabs.push({ label: typeNom, slot: 'after-tabs', value: `after-${typeNom}` });
+  });
+
+  return tabs;
+});
+
+// Tab items for the selected comment detail
+const commentDetailTabs = computed(() => [
+  { label: comTitre.value || 'Détail', slot: 'content', icon: 'i-lucide-file-text' },
+  { label: 'Mots-clés associés', slot: 'keywords', icon: 'i-lucide-tags' }
+]);
 
 const comTitre = computed(() => {
-  if (store.commentaires?.titre) {
-    const a = store.commentaires.titre.substring(0, 35);
-    const b = store.commentaires.titre.length > 35 ? "[ ...]" : "";
-    const c = a + b;
-    return c;
+  if (globalState.value.commentaires?.titre) {
+    return globalState.value.commentaires.titre.length > 35 
+      ? globalState.value.commentaires.titre.substring(0, 35) + "..." 
+      : globalState.value.commentaires.titre;
   }
   return "";
 });
 
-onMounted(() => {
-  if (navStore.selectedSourceID) {
-    retrieveSourceData(navStore.selectedSourceID);
-  }
-});
-
-onUpdated(() => {
-  if (navStore.selectedSourceID != oldID.value) {
-    retrieveSourceData(navStore.selectedSourceID);
-  }
-  oldID.value = navStore.selectedSourceID;
-});
-
-// DataFetching of the selected Source(id)
-const { $directus } = useNuxtApp();
-
+// Data fetching
 async function retrieveSourceData(id) {
-  source.value = await useAsyncData(() => {
-    return $directus.items("sources").readOne(id, {
-      fields: [
-        "id,titre,type_de_source.*,meta,fichiers.directus_files_id.id,fichiers.directus_files_id.filename_download,texte,content,editor_nodes.id,editor_nodes.item,editor_nodes.collection,commentaires.id,commentaires.status,commentaires.type.id,commentaires.type.sort,commentaires.type.Nom,commentaires.titre,commentaires.content,commentaires.keywords_id.keywords_id.titre,commentaires.keywords_id.keywords_id.id,theme_id.titre,theme_id.id",
-      ],
+  const { data } = await useAsyncData(`source-${id}`, () => {
+    return $directus.request({
+      method: 'GET',
+      path: `/items/sources/${id}`,
+      params: {
+        fields: [
+          "id", "titre", "type_de_source.*", "meta", 
+          "fichiers.directus_files_id.id", "fichiers.directus_files_id.filename_download", 
+          "texte", "content", "editor_nodes.id", "editor_nodes.item", "editor_nodes.collection", 
+          "commentaires.*", "commentaires.type.*", "commentaires.keywords_id.keywords_id.*",
+          "theme_id.titre", "theme_id.id"
+        ]
+      }
     });
   });
 
-  // ✅ Filter only published commentaires
-  if (source.value?.data?.commentaires) {
-    source.value.data.commentaires = source.value.data.commentaires.filter(
-      (c) => c.status === "published"
-    );
+  if (data.value) {
+    source.value = { data: data.value };
+    
+    if (source.value.data.editor_nodes && source.value.data.content) {
+      injectDataIntoContent(
+        source.value.data.editor_nodes,
+        source.value.data.content
+      );
+    }
+
+    const index = globalState.value.sources.findIndex((x) => x.id === id);
+    if (index !== -1) {
+      globalState.value.sources[index] = source.value.data;
+    } else {
+      globalState.value.sources.push(source.value.data);
+    }
   }
-
-  injectDataIntoContent(
-    source.value.data.editor_nodes,
-    source.value.data.content
-  );
-  //  Define renderers for relations
-
-  store.sources[store.sources.findIndex((x) => x.id === id)] =
-    source.value.data;
 }
 
-const relationBlocks = [];
-const relationInlineBlocks = [];
-const relationMarks = [
-  { collection: "related_comments", component: RelatedComment },
-];
+// Lifecycle hooks
+onMounted(() => {
+  if (navState.value.selectedSourceID) {
+    retrieveSourceData(navState.value.selectedSourceID);
+    oldID.value = navState.value.selectedSourceID;
+  }
+});
 
-//  Define renderers for custom blocks or marks
-// const componentSerializers = [];
+watch(() => navState.value.selectedSourceID, (newVal) => {
+  if (newVal && newVal !== oldID.value) {
+    retrieveSourceData(newVal);
+    oldID.value = newVal;
+  }
+});
+
+// Helpers
+function getCommentsByType(typeNom) {
+  if (!source.value?.data?.commentaires) return [];
+  const normalizeType = (value) => String(value || '').trim().toLowerCase();
+  return source.value.data.commentaires.filter(
+    (c) => normalizeType(c.type?.Nom) === normalizeType(typeNom)
+  );
+}
 
 const kwSelectectComment = computed(() => {
-  const dataSource =
-    store.sources[
-      store.sources.findIndex((x) => x.id === navStore.selectedSourceID)
-    ];
-  const dataSelectedComment =
-    dataSource.commentaires[
-      dataSource.commentaires.findIndex((x) => x.id === navStore.comID)
-    ];
+  if (!navState.value.selectedSourceID || !navState.value.comID) return [];
+  const dataSource = globalState.value.sources.find((x) => x.id === navState.value.selectedSourceID);
+  if (!dataSource || !dataSource.commentaires) return [];
+  const dataSelectedComment = dataSource.commentaires.find((x) => x.id === navState.value.comID);
   return dataSelectedComment ? dataSelectedComment.keywords_id : [];
 });
 
-// async function retrieveComments(id) {
-//   const { data } = await useAsyncData(() => {
-//     return $directus.items("commentaires").readOne(id);
-//   });
-//   store.commentaires = data.value;
-//   navStore.comVisibility = true;
-//   navStore.navVisibility = false;
-// }
-
-const activeTabIndex = ref(0);
-
-watch(activeTabIndex, (newIndex) => {
-  const offset = 2;
-  const dynamicIndex = newIndex - offset;
-
-  if (dynamicIndex >= 0) {
-    const typeNom = commentTypesId.value[dynamicIndex];
-    const comments = getCommentsByID(typeNom);
-    // console.log(comments);
-    if (comments.length === 1) {
-      // retrieveComments(comments[0]);
-      // console.log(comments[0]);
-    }
-  }
-});
-
 const commentairePosition = computed(() => {
-  const commentaire = source.value?.data?.commentaires.find(
+  const commentaire = source.value?.data?.commentaires?.find(
     (c) => c.type?.Nom === "Commentaire"
   );
   return commentaire?.type?.sort ?? 0;
 });
 
 const commentTypesBefore = computed(() => {
-  const raw = toRaw(source.value?.data?.commentaires || []);
-
+  const raw = source.value?.data?.commentaires || [];
   const entries = raw
     .filter((c) => c.type?.Nom !== "Commentaire")
     .map((c) => ({
@@ -415,8 +336,7 @@ const commentTypesBefore = computed(() => {
 });
 
 const commentTypesAfter = computed(() => {
-  const raw = toRaw(source.value?.data?.commentaires || []);
-
+  const raw = source.value?.data?.commentaires || [];
   const entries = raw
     .filter((c) => c.type?.Nom !== "Commentaire")
     .map((c) => ({
@@ -434,10 +354,33 @@ const commentTypesAfter = computed(() => {
     .sort((a, b) => a[1] - b[1])
     .map(([nom]) => nom);
 });
-</script>
 
-<style>
-.p-tabview .p-tabview-panels {
-  padding: 0;
+const relationMarks = [
+  { collection: "related_comments", component: RelatedComment },
+];
+
+function startResize() {
+  isResizing.value = true;
+  window.addEventListener('mousemove', onResize);
+  window.addEventListener('mouseup', stopResize);
 }
-</style>
+
+function onResize(event) {
+  if (!isResizing.value || !splitContainer.value) return;
+
+  const rect = splitContainer.value.getBoundingClientRect();
+  const next = ((event.clientX - rect.left) / rect.width) * 100;
+  leftPaneWidth.value = Math.min(80, Math.max(30, next));
+}
+
+function stopResize() {
+  if (!isResizing.value) return;
+  isResizing.value = false;
+  window.removeEventListener('mousemove', onResize);
+  window.removeEventListener('mouseup', stopResize);
+}
+
+onBeforeUnmount(() => {
+  stopResize();
+});
+</script>

@@ -1,183 +1,171 @@
 <template>
-  <div>
-    <router-link to="/" class="layout-topbar-logo"><h1 class="home-titre" style="text-align: center">NOMOTECHNIA - Grands arrêts britanniques</h1>
-    </router-link>
-    <div class="layout-topbar">
-      <!-- <router-link to="/" class="layout-topbar-logo"> -->
-        <!-- <img src="@/assets/logo.png" alt="logo" /> -->
-
-
-      <Menubar
-        class="layout-topbar-menu"
-        :class="topbarMenuClasses"
-        :model="items"
-      />
-
-      <div class="layout-topbar-menu" :class="topbarMenuClasses">
-        <button
-          @click="onTopBarMenuButton()"
-          class="p-link layout-topbar-button"
-        >
-          <i class="pi pi-search"></i>
-          <span>Search</span>
-        </button>
-        <NuxtLink to="https://admin.nomotechnia.rubidiumweb.fr/" target="_blank"> <button @click="onSettingsClick()" class="p-link layout-topbar-button">
-          <i class="pi pi-cog"></i>
-          <span>Settings</span>
-        </button>
+  <header class="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+    <div class="mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+      <NuxtLink to="/" class="text-3xl sm:text-4xl font-black tracking-tight uppercase text-gray-900 dark:text-white">
+        Nomotechnia
       </NuxtLink>
+
+      <nav class="hidden md:flex items-center gap-6 text-lg font-medium text-gray-800 dark:text-gray-100">
+        <NuxtLink to="/" class="inline-flex items-center gap-1 hover:text-primary-600 dark:hover:text-primary-400">
+          <UIcon name="i-lucide-home" class="w-4 h-4" />
+          Accueil
+        </NuxtLink>
+        <NuxtLink to="/sources" class="inline-flex items-center gap-1 hover:text-primary-600 dark:hover:text-primary-400">
+          <UIcon name="i-lucide-book-open" class="w-4 h-4" />
+          Sources
+        </NuxtLink>
+        <NuxtLink to="/keywords" class="inline-flex items-center gap-1 hover:text-primary-600 dark:hover:text-primary-400">
+          <UIcon name="i-lucide-tags" class="w-4 h-4" />
+          Mots-clés
+        </NuxtLink>
+
+        <details class="relative group">
+          <summary class="list-none cursor-pointer inline-flex items-center gap-1 hover:text-primary-600 dark:hover:text-primary-400">
+            <UIcon name="i-lucide-list" class="w-4 h-4" />
+            Thèmes
+            <UIcon name="i-lucide-chevron-down" class="w-4 h-4" />
+          </summary>
+          <div class="absolute right-0 top-7 z-50 w-72 max-h-96 overflow-auto rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg p-2">
+            <button
+              v-for="theme in globalState.themes || []"
+              :key="theme.id"
+              type="button"
+              class="w-full text-left px-2 py-1.5 text-sm rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+              @click="openTheme(theme.id)"
+            >
+              {{ theme.titre }}
+            </button>
+          </div>
+        </details>
+
+        <details class="relative group">
+          <summary class="list-none cursor-pointer inline-flex items-center gap-1 hover:text-primary-600 dark:hover:text-primary-400">
+            <UIcon name="i-lucide-users" class="w-4 h-4" />
+            Auteurs
+            <UIcon name="i-lucide-chevron-down" class="w-4 h-4" />
+          </summary>
+          <div class="absolute right-0 top-7 z-50 w-72 max-h-96 overflow-auto rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg p-2">
+            <NuxtLink
+              to="/auteurs"
+              class="block px-2 py-1.5 text-sm rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              Tous les auteurs
+            </NuxtLink>
+            <button
+              v-for="author in globalState.authors || []"
+              :key="author.id"
+              type="button"
+              class="w-full text-left px-2 py-1.5 text-sm rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+              @click="openAuthor(author.last_name)"
+            >
+              {{ author.first_name }} {{ author.last_name }}
+            </button>
+          </div>
+        </details>
+
+        <NuxtLink to="/map" class="inline-flex items-center gap-1 hover:text-primary-600 dark:hover:text-primary-400">
+          <UIcon name="i-lucide-map" class="w-4 h-4" />
+          Map
+        </NuxtLink>
+      </nav>
+
+      <div class="flex items-center gap-2 sm:gap-3">
+        <UButton
+          icon="i-lucide-search"
+          variant="ghost"
+          color="neutral"
+          square
+          aria-label="Rechercher"
+          class="hidden sm:inline-flex"
+        />
+        <UButton
+          to="https://admin.nomotechnia.rubidiumweb.fr/"
+          target="_blank"
+          icon="i-lucide-settings"
+          variant="ghost"
+          color="neutral"
+          square
+          aria-label="Administration"
+        />
+        <UColorModeButton />
+        <UButton
+          icon="i-lucide-menu"
+          variant="ghost"
+          color="neutral"
+          class="md:hidden"
+          @click="isMobileMenuOpen = true"
+        />
       </div>
     </div>
-  </div>
+
+    <div
+      v-if="isMobileMenuOpen"
+      class="md:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900"
+    >
+      <div class="p-4 space-y-2">
+        <NuxtLink to="/" class="block py-1.5" @click="isMobileMenuOpen = false">Accueil</NuxtLink>
+        <NuxtLink to="/sources" class="block py-1.5" @click="isMobileMenuOpen = false">Sources</NuxtLink>
+        <NuxtLink to="/keywords" class="block py-1.5" @click="isMobileMenuOpen = false">Mots-clés</NuxtLink>
+        <NuxtLink to="/themes" class="block py-1.5" @click="isMobileMenuOpen = false">Thèmes</NuxtLink>
+        <NuxtLink to="/auteurs" class="block py-1.5" @click="isMobileMenuOpen = false">Auteurs</NuxtLink>
+        <NuxtLink to="/map" class="block py-1.5" @click="isMobileMenuOpen = false">Map</NuxtLink>
+      </div>
+    </div>
+  </header>
 </template>
 
 <script setup>
-import { useNavStore } from "~/stores/navigation";
-import { useGlobalStore } from "~/stores/global";
-const navStore = useNavStore();
-const store = useGlobalStore();
-
+const globalState = useGlobalState();
+const navState = useNavState();
 const { $directus } = useNuxtApp();
 
-const { layoutConfig, onMenuToggle, contextPath } = useLayout();
+const isMobileMenuOpen = ref(false);
 
-const outsideClickListener = ref(null);
-const topbarMenuActive = ref(false);
+async function openTheme(themeId) {
+  navState.value.selectedThemeID = themeId;
+  await navigateTo('/themes');
+}
 
-onMounted(() => {
-  bindOutsideClickListener();
-  onMenuToggle();
-});
+async function openAuthor(lastName) {
+  await navigateTo(`/auteur-${lastName}`);
+}
 
-onBeforeUnmount(() => {
-  unbindOutsideClickListener();
-});
+// Dynamic data fetching for Authors and Themes
+async function fetchData() {
+  try {
+    const [authorsResponse, themesResponse] = await Promise.all([
+      $directus.request({
+        method: 'GET',
+        path: '/users',
+        params: {
+          fields: ['id', 'first_name', 'last_name', 'avatar', 'commentaires.status'],
+          filter: {
+            role: { _starts_with: 'aeeefb57-7b36' }
+          }
+        }
+      }),
+      $directus.request({
+        method: 'GET',
+        path: '/items/themes',
+        params: {
+          fields: ['id', 'titre']
+        }
+      })
+    ]);
 
-const items = ref([
-  { label: "ACCUEIL", icon: "pi pi-fw pi-home", to: "/" },
-  { label: "SOURCES", icon: "pi pi-fw pi-th-large", to: "/sources"  },
-  { label: "MOTS-CLÉS", icon: "pi pi-fw pi-tags", to: "/keywords" },
-  //   { label: "Thèmes", icon: "pi pi-fw pi-list", to: "/themes" },
-  { label: "THÈMES", icon: "pi pi-fw pi-list", items: [] },
-  { label: "AUTEURS", icon: "pi pi-fw pi-users", items: [] }, // change the item.value[5] if remove Alt
-  { label: "MAP", icon: "pi pi-fw pi-share-alt", to: "/map" },
-]);
-
-async function retrieveAuthors() {
-  const { data: publicData } = await useAsyncData(() => {
-    return $directus.items("directus_users").readByQuery({
-      fields: ["id,first_name,last_name,role,avatar,email,commentaires.status,commentaires.id,short_cv"],
-      filter: {
-        role: {
-          _starts_with: "aeeefb57-7b36",
-        },
-      },
-    });
-  });
-
-
-  // Safety: fallback if no data
-  const allUsers = publicData.value?.data || [];
-
-  // Filter only those with at least one published commentaire
-  const filtered = allUsers.filter((user) =>
-    user.commentaires?.some((c) => c.status === "published")
-  );
-
-  // Update your store with the filtered list
-  store.authors = filtered;
-
-  items.value[4].items.push({
-    label: " - Tous les auteurs - ",
-    to: "/auteurs",
-  });
-  for (let author of store.authors) {
-    // items.value[1].items[3].items.push({
-    items.value[4].items.push({
-      label: author.first_name + " " + author.last_name,
-      to: "/auteur-" + author.last_name,
-    });
+    // Filter authors with published comments
+    globalState.value.authors = authorsResponse.filter(user => 
+      user.commentaires?.some(c => c.status === 'published')
+    );
+    globalState.value.themes = themesResponse;
+  } catch (error) {
+    console.error('Error fetching navigation data:', error);
   }
 }
 
-async function retrieveThemes() {
-  const { data: publicData } = await useAsyncData(() => {
-    return $directus.items("themes").readByQuery({
-      fields: ["id,titre"],
-    });
-  });
-
-  store.themes = publicData.value.data;
-
-  for (let theme of store.themes) {
-    // items.value[1].items[3].items.push({
-    items.value[3].items.push({
-      label: theme.titre,
-      icon: "pi pi-fw pi-book",
-      to: "/themes",
-      command: () => {
-        navStore.selectedThemeID = theme.id;
-        // console.log(navStore.selectedThemeID);
-      },
-    });
-  }
-}
-
-// add authors
 onMounted(() => {
-  if (!store.authors[0]) {
-    retrieveAuthors();
-  }
-  if (!store.themes[0]) {
-    retrieveThemes();
+  if (!globalState.value.authors?.length || !globalState.value.themes?.length) {
+    fetchData();
   }
 });
-
-// const logoUrl = computed(() => {
-//     return `${contextPath}layout/images/${layoutConfig.darkTheme.value ? 'logo-white' : 'logo-dark'}.svg`;
-// });
-
-// const logoUrl = "@/assets/logo.png"
-
-const onTopBarMenuButton = () => {
-  topbarMenuActive.value = !topbarMenuActive.value;
-};
-const onSettingsClick = () => {
-  topbarMenuActive.value = false;
-};
-const topbarMenuClasses = computed(() => {
-  return {
-    "layout-topbar-menu-mobile-active": topbarMenuActive.value,
-  };
-});
-
-const bindOutsideClickListener = () => {
-  if (!outsideClickListener.value) {
-    outsideClickListener.value = (event) => {
-      if (isOutsideClicked(event)) {
-        topbarMenuActive.value = false;
-      }
-    };
-    document.addEventListener("click", outsideClickListener.value);
-  }
-};
-const unbindOutsideClickListener = () => {
-  if (outsideClickListener.value) {
-    document.removeEventListener("click", outsideClickListener);
-    outsideClickListener.value = null;
-  }
-};
-const isOutsideClicked = (event) => {
-  if (!topbarMenuActive.value) return;
-
-  const sidebarEl = document.querySelector(".layout-topbar-menu");
-  const topbarEl = document.querySelector(".layout-topbar-menu-button");
-
-  return !(
-    sidebarEl.isSameNode(event.target) ||
-    sidebarEl.contains(event.target) ||
-    topbarEl.isSameNode(event.target) ||
-    topbarEl.contains(event.target)
-  );
-};
 </script>

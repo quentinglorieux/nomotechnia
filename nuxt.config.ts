@@ -1,52 +1,36 @@
-const baseUrl = '/';
-
 export default defineNuxtConfig({
+  compatibilityDate: '2026-02-16',
+  future: {
+    compatibilityVersion: 4,
+    
+  },
+
   modules: [
-    "@nuxtjs/tailwindcss",
-    '@pinia/nuxt',
-    '@sidebase/nuxt-pdf'],
-  ssr: false,
-  runtimeConfig: {
-    apiSecret: '1',
-    public: {
-      API_BASE_URL: 'https://admin.nomotechnia.rubidiumweb.fr'
-      // API_BASE_URL: 'https://jurisdirectus.rubidiumweb.eu'
-      //API_BASE_URL: 'http://localhost:5555'
-    }
-  },
-  css: [
-    //"primevue/resources/themes/saga-blue/theme.css",
-    "~/assets/styles/theme/rb-light/theme.css",
-    "primevue/resources/primevue.css",
-    "primeicons/primeicons.css",
-    "~/assets/styles.scss",
+    "@nuxt/ui",
+    "@sidebase/nuxt-pdf"
   ],
-  build: {
-    transpile: ["primevue"],
-  },
 
   components: [
     {
-      path: "~/components/",
+      path: '~/components',
       pathPrefix: false,
     },
   ],
 
-  devtools: {
-    enabled: false,
+  ssr: true,
+
+  runtimeConfig: {
+    apiSecret: '1',
+    public: {
+      API_BASE_URL: process.env.NUXT_PUBLIC_API_BASE_URL || 'https://admin.nomotechnia.rubidiumweb.fr'
+    }
   },
 
-  /*app: {
-    baseURL: baseUrl,
-    head: {
-        link: [
-            {
-                id: 'theme-link',
-                rel: 'stylesheet',
-                href: baseUrl + 'assets/styles/theme/arya-blue/theme.css'
-            }
-        ],
-      }
-    }*/
-});
+  css: [
+    "~/assets/main.css",
+  ],
 
+  devtools: {
+    enabled: true,
+  }
+});

@@ -3,23 +3,22 @@
     <NuxtLink
       v-if="theme"
       to="/themes"
-      @click="navStore.selectedThemeID = theme.id"
+      class="inline-block"
+      @click="navState.selectedThemeID = theme.id"
     >
-      <Tag
-        class="mr-2 text-lg hover:bg-slate-700"
-        :value="theme.titre"
+      <UBadge
+        :label="theme.titre"
+        size="lg"
+        variant="solid"
+        class="cursor-pointer hover:bg-primary-600 transition-colors shadow-sm"
       />
     </NuxtLink>
   </div>
 </template>
 
 <script setup>
-import { computed } from "vue";
-import { useNavStore } from "~/stores/navigation";
-
-const navStore = useNavStore();
+const navState = useNavState();
 const props = defineProps(["source"]);
 
-// Safe access to theme
 const theme = computed(() => props.source?.data?.theme_id ?? null);
 </script>

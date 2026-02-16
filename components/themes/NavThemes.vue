@@ -1,123 +1,120 @@
 <template>
-<div v-if="visible" class="nav-component">
-    <div class="nav-title">
-      <div><i class="pi pi-fw pi-list"></i> THEMES</div>
-      <div>
-        <button class="layout-topbar-button" @click="toggleNav()">
-          <i class="pi pi pi-angle-double-left"></i>
-        </button>
+  <div>
+    <div v-if="visible" class="w-80 min-w-80 max-w-80 flex flex-col h-full border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden">
+      <div class="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800">
+        <div class="flex items-center gap-2 font-semibold text-sm text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+          <UIcon name="i-lucide-list" class="w-4 h-4" />
+          THEMES
+        </div>
+        <UButton
+          icon="i-lucide-chevrons-left"
+          variant="ghost"
+          color="neutral"
+          size="sm"
+          @click="toggleNav"
+          aria-label="Fermer le menu"
+        />
+    </div>
+
+      <div class="p-4 border-b border-gray-100 dark:border-gray-800">
+        <UInput
+          v-model="searchQuery"
+          icon="i-lucide-search"
+          placeholder="Rechercher un thème..."
+          size="sm"
+          class="w-full"
+          clearable
+        />
+      </div>
+
+      <div class="flex-1 overflow-hidden h-96">
+        <UScrollArea class="h-full">
+          <UTable
+            :data="filteredItems"
+            :columns="columns"
+            sticky
+            class="w-full"
+            :ui="{
+              thead: 'hidden',
+              tr: 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors',
+              td: 'py-3 px-4'
+            }"
+            @select="onRowSelect"
+          >
+            <template #titre-cell="{ row }">
+              <button
+                type="button"
+                class="w-full text-left"
+                @click="selectTheme(row.original)"
+                :title="row.original.titre"
+              >
+                <div :class="[
+                  'text-sm leading-snug truncate whitespace-nowrap',
+                  navState.selectedThemeID === row.original.id ? 'font-bold text-primary-600 dark:text-primary-400' : 'text-gray-600 dark:text-gray-300'
+                ]">
+                  {{ row.original.titre }}
+                </div>
+              </button>
+            </template>
+          </UTable>
+        </UScrollArea>
       </div>
     </div>
-    <DataTable
-      :value="listItems"
-      v-model:filters="filter1"
-      filterDisplay="menu"
-      :globalFilterFields="['titre']"
-      selectionMode="single"
-      dataKey="id"
-      responsiveLayout="scroll"
-      class="p-datatable-sm"
-      :scrollable="true"
-      scrollHeight="flex"
-      :resizableColumns="true"
-      columnResizeMode="fit"
-      @rowSelect="onRowSelect"
-    >
-      <template #header>
-        <div class="flex" style="justify-content:space-between">
-          <Button
-            type="button"
-            icon="pi pi-filter-slash"
-            label="Clear"
-            class="p-button-outlined"
-            @click="clearFilter1()"
-          />
-          <span class="p-input-icon-left">
-            <i class="pi pi-search" />
-            <InputText v-model="filter1['global'].value" placeholder="Theme Search" />
-          </span>
-        </div>
-      </template>
-      <Column field="titre" header="Titre" :sortable="true"></Column>
-      <Column field="meta" header="Meta" :sortable="true"></Column>
-    </DataTable>
-  </div>
-  <div v-if="!visible" class="">
-    <button class="layout-topbar-button" @click="toggleNav()">
-      <i class="pi pi pi-angle-double-right"></i>
-    </button>
+
+    <div v-if="!visible" class="p-2 border-r border-gray-200 dark:border-gray-800 h-full bg-white dark:bg-gray-900">
+      <UButton
+        icon="i-lucide-chevrons-right"
+        variant="ghost"
+        color="neutral"
+        size="md"
+        @click="toggleNav"
+        aria-label="Ouvrir le menu"
+      />
+    </div>
   </div>
 </template>
 
 <script setup>
-import { FilterMatchMode, FilterOperator } from "primevue/api";
-const props = defineProps(["visible"]);
-import { useGlobalStore } from "~/stores/global";
-const store = useGlobalStore();
-import { useNavStore } from "@/stores/navigation";
-const navStore = useNavStore();
-const listItems = computed(() => store.themes);
+const props = defineProps({
+  visible: {
+    type: Boolean,
+    default: true
+  }
+});
+
+const globalState = useGlobalState();
+const navState = useNavState();
+
+const searchQuery = ref('');
+
+const columns = [
+  { accessorKey: 'titre', header: 'Titre' }
+];
+
+const listItems = computed(() => globalState.value.themes || []);
+
+const filteredItems = computed(() => {
+  if (!listItems.value.length) return [];
+  if (!searchQuery.value) return listItems.value;
+  
+  const query = searchQuery.value.toLowerCase();
+  return listItems.value.filter(item => 
+    item.titre?.toLowerCase().includes(query)
+  );
+});
+
 function toggleNav() {
-  navStore.toggleNav();
+  navState.value.navVisibility = !navState.value.navVisibility;
 }
 
-const filter1 = ref({
-  global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-  titre: {
-    operator: FilterOperator.AND,
-    constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
-  },
-});
-const clearFilter1 = () => {
-  initFilters1();
+function selectTheme(selected) {
+  if (!selected?.id) return;
+
+  navState.value.selectedThemeID = selected.id;
+}
+
+const onRowSelect = (event) => {
+  const selected = event?.row?.original ?? event?.row ?? event?.original ?? event;
+  selectTheme(selected);
 };
-const initFilters1 = () => {
-  filter1.value = {
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    titre: {
-      operator: FilterOperator.AND,
-      constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }],
-    },
-  };
-};
-const onRowSelect = (node) => {
-  navStore.selectedThemeID = node.data.id;
-};
-
-
-/*const sourceIsSelected = ref(false);
-const emit = defineEmits(["themeSelected", "closeNavSource"]);
-const onRowSelect = (node) => {
-  emit("themeSelected", node);
-  // console.log(node)
-  sourceIsSelected.value = !sourceIsSelected.value;
-};
-
-
-/*import { useGlobalStore } from "~/stores/global";
-const store = useGlobalStore();
-const listItems = computed(() => store.themes);
-import { FilterMatchMode, FilterOperator } from "primevue/api";
-
-
-const visibility=ref(true);
-function togleVisibility(){
-  visibility.value=!visibility.value
-}*/
-
-// const config = useRuntimeConfig();
-// const directus = new Directus(config.public.API_BASE_URL);
-
-// const listItems = ref([]);
-// async function retrieveSources() {
-//   const publicData = await directus.items("themes").readByQuery({
-//     fields: [
-//       "titre,introduction, sources.id,sources.titre",
-//     ],
-//   });
-//   var L = publicData.data;
-//   listItems.value = L;
-// }
-// retrieveSources();
-
 </script>

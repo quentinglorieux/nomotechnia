@@ -1,48 +1,39 @@
 <template>
-  <div class="flex min-h-screen">
+  <div class="flex h-screen overflow-hidden bg-white dark:bg-gray-900">
+    <NavThemes
+      :visible="navState.navVisibility"
+      class="shrink-0"
+    />
 
-    <!-- <NavThemes   @themeSelected="(e) => (themeSelection = e)" /> -->
-    <MainThemes :theme="navStore.selectedThemeID"/>
-    
+    <MainThemes 
+      :theme="navState.selectedThemeID" 
+      class="flex-1 min-w-0"
+    />
   </div>
 </template>
 
 <script setup>
+import NavThemes from '~/components/themes/NavThemes.vue';
+import MainThemes from '~/components/themes/MainThemes.vue';
 
-// DataFetching of Themes
-import { useGlobalStore } from "~/stores/global";
-const store = useGlobalStore();
-
-import { useNavStore } from "~/stores/navigation";
-const navStore = useNavStore();
-
-
+const navState = useNavState();
+const globalState = useGlobalState();
 const { $directus } = useNuxtApp();
-async function retrieveFullThemesData() {
-  const { data: publicData } = await useAsyncData(() => {
-    return $directus.items("themes").readByQuery({
-      fields: [
-        "id,titre,introduction,sources.id,sources.titre",
-      ],
-    });
+
+// Fetch themes data for navigation if not already present
+const { data } = await useAsyncData('themes-nav', async () => {
+  if (globalState.value.themes?.length) return globalState.value.themes;
+  
+  const response = await $directus.request({
+    method: 'GET',
+    path: '/items/themes',
+    params: {
+      fields: ['id', 'titre', 'introduction', 'sources.id', 'sources.titre'],
+      sort: ['titre']
+    }
   });
-  store.themes = publicData.value.data; //Storage of Themes data
-}
-
-onMounted(() => {
-  if(store.themes[0]){
-    retrieveFullThemesData();
-  }
+  
+  globalState.value.themes = response;
+  return response;
 });
-
-
-
-
-
-
-
 </script>
-
-<style scoped lang="scss">
-
-</style>

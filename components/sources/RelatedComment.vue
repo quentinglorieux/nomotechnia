@@ -1,67 +1,56 @@
 <template>
   <mark
-    class="cursor-pointer"
+    class="cursor-pointer bg-yellow-400/30 dark:bg-yellow-600/30 hover:bg-yellow-400/50 dark:hover:bg-yellow-600/50 px-1 rounded transition-colors"
     :data-linkedcomment="props.data"
     @click="() => retrieveComments(props)"
   >    
-  <slot></slot>
+    <slot></slot>
   </mark>
 </template>
 
-<script setup lang="ts">
-import { defineProps } from "vue";
-import type { RelationNodeProps } from "directus-extension-flexible-editor/content";
-import { useNavStore } from "@/stores/navigation";
-import { useGlobalStore } from "~/stores/global";
+<script setup>
+const navState = useNavState();
+const globalState = useGlobalState();
 
-const navStore = useNavStore();
-const store = useGlobalStore();
-
-// ✅ Destructure explicitly as `props`
-const props = defineProps<{
-  id: RelationNodeProps["id"];
-  junction: RelationNodeProps["junction"];
-  collection: RelationNodeProps["collection"];
-  data?: RelationNodeProps["data"];
-}>();
+const props = defineProps({
+  id: {},
+  junction: {},
+  collection: {},
+  data: {}
+});
 
 const { $directus } = useNuxtApp();
 
 async function retrieveComments(com) {
   if (!com?.data) return;
 
-  // Step 1: fetch the related_comments record
-  const { data: relationData } = await useAsyncData(() =>
-    $directus.items("related_comments").readOne(com.data, {
-      fields: ["commentaires"], // Just need the M2O field
-    })
-  );
+  try {
+    // Step 1: fetch the related_comments record
+    const relationData = await $directus.request({
+      method: 'GET',
+      path: `/items/related_comments/${com.data}`,
+      params: {
+        fields: ["commentaires"]
+      }
+    });
 
+    const commentId = relationData?.commentaires;
+    if (!commentId) return;
 
-  const commentId = relationData.value?.commentaires;
-  // console.log("commentId", commentId);
-  if (!commentId) return;
+    // Step 2: fetch the actual commentaire
+    const commentData = await $directus.request({
+      method: 'GET',
+      path: `/items/commentaires/${commentId}`
+    });
 
-  // Step 2: fetch the actual commentaire
-  const { data: commentData } = await useAsyncData(() =>
-    $directus.items("commentaires").readOne(commentId)
-  );
-
-  // console.log("commentData", commentData.value);
-
-  store.commentaires = commentData.value;
-  // console.log("store.commentaires", store.commentaires);
-  
-  navStore.comID = commentId;
-  navStore.comVisibility = true;
-  navStore.navVisibility = false;
+    if (commentData) {
+      globalState.value.commentaires = commentData;
+      navState.value.comID = commentId;
+      navState.value.comVisibility = true;
+      navState.value.navVisibility = false;
+    }
+  } catch (error) {
+    console.error('Error fetching related comment:', error);
+  }
 }
 </script>
-
-<style scoped>
-mark {
-  background-color: rgba(255, 230, 0, 0.4);
-  padding: 0 4px;
-  border-radius: 4px;
-}
-</style>

@@ -1,155 +1,178 @@
 <template>
-  <div v-if="!author">Chargement en cours</div>
-  <div v-else class="p-3 w-2/3 mx-auto mt-1">
-    <div class="titre-page mx-2">
-      <h1>{{ author.first_name + " " + author.last_name }}</h1>
+  <UContainer class="py-8">
+    <div v-if="pending" class="flex items-center justify-center min-h-[400px]">
+      <UIcon name="i-lucide-loader-2" class="w-8 h-8 animate-spin text-primary-500" />
     </div>
-    <Panel
-      class="px-2 mt-2"
-      header="Biographie"
-      toggleable
-      :collapsed="isCollapsed"
-      @click="isCollapsed = !isCollapsed"
-    >
-      <div>{{ author.short_cv }}</div>
-    </Panel>
 
-    <div class="py-2 px-2" style="text-align: left">
-      <DataTable
-        showGridlines
-        scrollable
-        :value="listItems"
-        tableStyle="min-width: 50rem"
-        :class="`p-datatable-sm`"
-      >
-        <Column sortable field="titre" header="Commentaires">
-          <template #body="slotCom">
-            <span class="hover:bg-sky-200">
-              <NuxtLink
-                to="/sources"
-                @click="
-                  setNavSource(slotCom.data.source_id.id);
-                  setSelectedComment(slotCom.data.id);
-                "
-              >
-                {{ slotCom.data.titre }}
-              </NuxtLink>
-            </span>
+    <div v-else-if="author" class="space-y-8 max-w-5xl mx-auto">
+      <!-- Author Header -->
+      <div class="flex flex-col sm:flex-row items-center gap-6 border-b border-gray-100 dark:border-gray-800 pb-8">
+        <div
+          v-if="author.avatar"
+          class="w-52 h-52 rounded-full overflow-hidden ring-4 ring-primary-50 dark:ring-primary-900/20 shrink-0"
+        >
+          <img
+            :src="'https://admin.nomotechnia.rubidiumweb.fr/assets/' + author.avatar + '?fit=cover&width=320&height=320&quality=80'"
+            :alt="`${author.first_name} ${author.last_name}`"
+            class="w-full h-full object-cover"
+          >
+        </div>
+        <div class="text-center sm:text-left space-y-2">
+          <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+            {{ author.first_name }} {{ author.last_name }}
+          </h1>
+          <div class="flex items-center justify-center sm:justify-start gap-2 text-primary-600 dark:text-primary-400 font-medium">
+            <UIcon name="i-lucide-award" />
+            <span>Auteur contributeur</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Biography -->
+      <UCard v-if="author.short_cv">
+        <template #header>
+          <div class="flex items-center gap-2 font-bold text-gray-900 dark:text-gray-100">
+            <UIcon name="i-lucide-scroll" class="text-primary-500" />
+            Biographie
+          </div>
+        </template>
+        <div class="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300">
+          {{ author.short_cv }}
+        </div>
+      </UCard>
+
+      <!-- Comments List -->
+      <div class="space-y-4">
+        <h2 class="text-2xl font-bold flex items-center gap-2 text-gray-900 dark:text-white">
+          <UIcon name="i-lucide-message-square" class="text-primary-500" />
+          Commentaires publiés
+        </h2>
+
+        <UTable
+          :data="comments"
+          :columns="columns"
+          class="border border-gray-100 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm"
+          :ui="{
+            thead: 'bg-gray-50 dark:bg-gray-800/50',
+            tr: 'hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors',
+            td: 'py-4 px-6'
+          }"
+        >
+          <!-- Commentaire -->
+          <template #titre-cell="{ row }">
+            <NuxtLink
+              to="/sources"
+              class="font-semibold text-primary-600 dark:text-primary-400 hover:underline"
+              @click="navigateToComment(row.original)"
+            >
+              {{ row.original.titre }}
+            </NuxtLink>
           </template>
-        </Column>
 
-        <Column sortable field="source_id.titre" header="Sources">
-          <template #body="slotSource">
-            <span class="hover:bg-sky-200">
-              <NuxtLink
-                to="/sources"
-                @click="setNavSource(slotSource.data.source_id.id)"
-                >{{ slotSource.data.source_id.titre }}
-              </NuxtLink>
-            </span>
+          <!-- Source -->
+          <template #source-cell="{ row }">
+            <NuxtLink
+              to="/sources"
+              class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary-500 transition-colors flex items-center gap-1"
+              @click="navigateToSource(row.original.source_id.id)"
+            >
+              <UIcon name="i-lucide-book" class="w-3.5 h-3.5" />
+              {{ row.original.source_id.titre }}
+            </NuxtLink>
           </template>
-        </Column>
 
-        <Column field="id" header="">
-          <template #body="SlotCom">
-            <div class="flex justify-center">
-              <Button
-                class="mt-1 mx-1"
-                @click="onCommentButtonClick(SlotCom.data.id)"
-              >
-                Lire
-              </Button>
+          <!-- Action -->
+          <template #action-cell="{ row }">
+            <div class="flex justify-end">
+              <UButton
+                size="sm"
+                color="neutral"
+                variant="ghost"
+                icon="i-lucide-eye"
+                label="Consulter"
+                @click="openSlideover(row.original.id)"
+              />
             </div>
           </template>
-        </Column>
-      </DataTable>
+        </UTable>
+      </div>
     </div>
 
-    <Sidebar
-      v-model:visible="visible"
-      position="right"
-      :transitionOptions="'.3s cubic-bezier(0, 0, 0.2, 1)'"
-      class="layout-comment-sidebar bg-gray-50 w-fit"
+    <!-- Slideover for Comment Side -->
+    <USlideover
+      v-model:open="isSlideoverOpen"
+      title="Aperçu du commentaire"
+      :ui="{ width: 'max-w-xl' }"
     >
-      <CommentaireSide :com="selectedCom"> </CommentaireSide>
-    </Sidebar>
-  </div>
+      <div class="h-full bg-gray-50 dark:bg-gray-950 overflow-y-auto">
+        <CommentaireSide v-if="selectedComId" :com="selectedComId" @close="isSlideoverOpen = false" />
+      </div>
+    </USlideover>
+  </UContainer>
 </template>
 
 <script setup>
-import { useNavStore } from "@/stores/navigation";
-const navStore = useNavStore();
 const route = useRoute();
-
-const listItems = ref([]);
-const author = ref();
-const visible = ref(false);
-const selectedCom = ref("");
-const isCollapsed = ref(true);
-
-// DataFetching of Commentaires
+const navState = useNavState();
 const { $directus } = useNuxtApp();
-async function retrieveComments() {
-  const { data: publicData } = await useAsyncData(() => {
-    return $directus.items("commentaires").readByQuery({
-      fields: ["id,titre,source_id.titre,source_id.id"],
-      filter: {
-        auteur_id: {
-          last_name: {
-            _eq: route.params.id,
-          },
-        },
-        status: {
-          _eq: "published",
-        },
-      },
-    });
-  });
-  var L = publicData.value.data;
-  listItems.value = L;
-}
 
-async function retrieveAuthor() {
-  const { data: publicData } = await useAsyncData(() => {
-    return $directus.items("directus_users").readByQuery({
-      fields: ["id,first_name,last_name,first_name,short_cv"],
-      filter: {
-        last_name: {
-          _eq: route.params.id,
-        },
-      },
-    });
-  });
-  // console.log(publicData);
-  var L = publicData.value.data;
-  author.value = L[0];
-}
+const isSlideoverOpen = ref(false);
+const selectedComId = ref(null);
 
-const onCommentButtonClick = (com) => {
-  visible.value = !visible.value;
-  selectedCom.value = com;
-};
+// Columns for the table
+const columns = [
+  { accessorKey: 'titre', header: 'Commentaire' },
+  { accessorKey: 'source', header: 'Source' },
+  { accessorKey: 'action', header: '', class: 'w-32' }
+];
 
-function setNavSource(id) {
-  // console.log(id);
-  navStore.selectedSourceID = id;
-  navStore.comVisibility = false;
-}
+// Fetch Author Data
+const { data: authorData, pending } = await useAsyncData(`author-${route.params.id}`, async () => {
+  const [userData, commentsData] = await Promise.all([
+    $directus.request({
+      method: 'GET',
+      path: '/users',
+      params: {
+        fields: ['id', 'first_name', 'last_name', 'avatar', 'short_cv'],
+        filter: { last_name: { _eq: route.params.id } }
+      }
+    }),
+    $directus.request({
+      method: 'GET',
+      path: '/items/commentaires',
+      params: {
+        fields: ['id', 'titre', 'source_id.titre', 'source_id.id'],
+        filter: {
+          auteur_id: { last_name: { _eq: route.params.id } },
+          status: { _eq: 'published' }
+        }
+      }
+    })
+  ]);
 
-function setSelectedComment(id) {
-  // console.log(id);
-  navStore.comID = id;
-  navStore.comVisibility = true;
-  navStore.navVisibility = false;
-}
-
-onMounted(() => {
-  retrieveComments();
-  retrieveAuthor();
-  // retrieveAuthors();
+  return {
+    author: userData?.[0],
+    comments: commentsData || []
+  };
 });
 
-watch(route, (newX) => {
-  // retrieveComments();
-});
+const author = computed(() => authorData.value?.author);
+const comments = computed(() => authorData.value?.comments);
+
+function navigateToSource(id) {
+  navState.value.selectedSourceID = id;
+  navState.value.comVisibility = false;
+}
+
+function navigateToComment(com) {
+  navState.value.selectedSourceID = com.source_id.id;
+  navState.value.comID = com.id;
+  navState.value.comVisibility = true;
+  navState.value.navVisibility = false;
+}
+
+function openSlideover(id) {
+  selectedComId.value = id;
+  isSlideoverOpen.value = true;
+}
 </script>

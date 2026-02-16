@@ -1,62 +1,25 @@
 <template>
-  <div class="flex flex-wrap p-2 pt-3">
+  <div class="flex flex-wrap gap-2 p-3">
     <NuxtLink
-      class="link"
       v-for="kw in kwList"
+      :key="kw.keywords_id.id"
       to="/keywords"
-      @click="navStore.selectedKeywordID = kw.keywords_id.id"
+      class="group inline-flex items-center gap-2 px-3 py-1 bg-gray-100 hover:bg-primary-50 dark:bg-gray-800 dark:hover:bg-primary-900/30 rounded-full border border-transparent hover:border-primary-200 dark:hover:border-primary-800 transition-all duration-200"
+      @click="navState.selectedKeywordID = kw.keywords_id.id"
     >
-
-
-    <div class="bg-slate-300 rounded-full flex flex-wrap gap-2">
-        <Chip class="pl-0 pr-3 flex">
-          <span
-            class="bg-primary border-circle w-2rem h-2rem flex align-items-center justify-content-center"
-          >
-            {{ kw.keywords_id.titre[0] }}</span
-          >
-          <span class="ml-2 font-medium">{{ kw.keywords_id.titre }}</span>
-        </Chip>
-      </div>
+      <UAvatar
+        :alt="kw.keywords_id.titre?.[0]"
+        size="xs"
+        :ui="{ background: 'bg-primary-100 dark:bg-primary-900', fallback: 'text-primary-700 dark:text-primary-400 font-bold' }"
+      />
+      <span class="text-xs font-medium text-gray-700 dark:text-gray-200 group-hover:text-primary-700 dark:group-hover:text-primary-400">
+        {{ kw.keywords_id.titre }}
+      </span>
     </NuxtLink>
   </div>
 </template>
 
 <script setup>
-import { useNavStore } from "@/stores/navigation";
-const navStore = useNavStore();
-
-
+const navState = useNavState();
 const props = defineProps(["kwList"]);
-
-
-
 </script>
-
-<style scoped>
-.link {
-  color: #18272f;
-  position: relative;
-  text-decoration: none;
-  padding: 10px;
-}
-
-.link::before {
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: 1px;
-  border-radius: 1px;
-  background-color: #18272f;
-  bottom: 0;
-  left: 0;
-  transform-origin: right;
-  transform: scaleX(0);
-  transition: transform 0.3s ease-in-out;
-}
-
-.link:hover::before {
-  transform-origin: left;
-  transform: scaleX(1);
-}
-</style>

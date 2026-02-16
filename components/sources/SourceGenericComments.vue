@@ -1,61 +1,91 @@
 <template>
-    <div class="p-3 pt-4">
-      <li 
-        v-for="com in comments"
-        :key="com.id"
-        class="mb-2 no-marker-li"
-      >
-        <div class="flex items-center p-1">
-          <template v-if="comments.length === 1">
-            <!-- Pas de bouton œil si un seul commentaire, juste le titre -->
-            <div class="grow text-lg">
-                <CommentaireSide
-                  :com="comments[0].id"
-                  :key="com.id">
-                </CommentaireSide>
-            </div>
-          </template>
-  
-          <template v-else>
-            <Button
-              rounded
-              class="shrink-0 min-w-fit bg-gray-200 hover:bg-blue-100 mr-2"
-              icon="pi pi-eye"
-              text
-              @click="retrieveComments(com)"
+  <div class="p-3 pt-4 space-y-4">
+    <div v-if="!comments.length" class="text-sm text-gray-500 italic p-4 text-center">
+      Aucun contenu disponible.
+    </div>
+    <div v-else>
+      <div v-if="comments.length > 1">
+        <div 
+          v-for="com in comments"
+          :key="com.id"
+          class="mb-2"
+        >
+          <button
+            class="w-full text-left flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group"
+            @click="selectComment(com)"
+          >
+            <UButton
+              size="sm"
+              color="neutral"
+              variant="soft"
+              icon="i-lucide-eye"
+              :loading="loadingStates[com.id]"
+              class="shrink-0 pointer-events-none"
             />
-            <div class="grow text-lg">
+            <div class="text-sm font-medium text-gray-700 dark:text-gray-200 line-clamp-2">
               {{ com.titre }}
             </div>
-          </template>
+          </button>
         </div>
-      </li>
+      </div>
+
+      <CommentaireSide
+        v-if="selectedCommentId"
+        :com="selectedCommentId"
+        :key="selectedCommentId"
+      />
     </div>
-  </template>
+  </div>
+</template>
+
+<script setup>
+const props = defineProps({
+  comments: {
+    type: Array,
+    required: true,
+  },
+});
+
+const globalState = useGlobalState();
+const { $directus } = useNuxtApp();
+
+const loadingStates = ref({});
+const selectedCommentId = ref(null);
+
+async function selectComment(com) {
+  const id = com.id;
+  selectedCommentId.value = id;
+  loadingStates.value[id] = true;
   
-  <script setup>
-  import { useNavStore } from "@/stores/navigation";
-  import { useGlobalStore } from "~/stores/global";
-  
-  const props = defineProps({
-    comments: {
-      type: Array,
-      required: true,
-    },
-  });
-  
-  const navStore = useNavStore();
-  const store = useGlobalStore();
-  const { $directus } = useNuxtApp();
-  
-  async function retrieveComments(com) {
-    const { data } = await useAsyncData(() => {
-      return $directus.items("commentaires").readOne(com.id);
+  try {
+    const data = await $directus.request({
+      method: 'GET',
+      path: `/items/commentaires/${id}`
     });
-  
-    store.commentaires = data.value;
-    navStore.comVisibility = true;
-    navStore.navVisibility = false;
-    navStore.comID = com.id;
+    
+    if (data) {
+      globalState.value.commentaires = data;
+    }
+  } catch (error) {
+    console.error('Error fetching generic comment:', error);
+  } finally {
+    loadingStates.value[id] = false;
   }
-  </script>
+}
+
+watch(
+  () => props.comments,
+  (comments) => {
+    if (!comments.length) {
+      selectedCommentId.value = null;
+      return;
+    }
+
+    const hasSelected = comments.some((c) => c.id === selectedCommentId.value);
+    if (!hasSelected) {
+      selectComment(comments[0]);
+    }
+  },
+  { immediate: true, deep: true }
+);
+</script>

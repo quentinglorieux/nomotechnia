@@ -1,201 +1,214 @@
 <template>
-  <div class="w-full">
-    <div class="flex flex-column p-1 w-full">
-      <!-- {{ navStore.selectedKeywordID }} -->
-      <div class="card2 bg-slate-100 w-1/2 ml-6 mt-3" v-if="!kw">
-        <h3>Navigation par Mot-clés</h3>
-<div class="text-justify leading-relaxed text-gray-700">
-  Cette section vous permet d’explorer les grands arrêts britanniques à travers une sélection de <strong>mots-clés juridiques</strong>. 
-  Chaque mot-clé regroupe des commentaires associés à des décisions majeures, offrant une lecture transversale des enjeux doctrinaux et jurisprudentiels.
-
-  <br /><br />
-  Utilisez cette navigation pour parcourir les concepts fondamentaux du <em>Common Law</em> — <strong>judicial review</strong>, <strong>rule of law</strong>, <strong>proportionality</strong>, <strong>due process</strong> — et découvrir comment ils sont mobilisés et débattus dans les commentaires liés aux sources.
-
-  <br /><br />
-  Cliquez sur un mot-clé pour consulter sa fiche explicative, la liste des commentaires associés, les décisions concernées, et les auteurs ayant contribué à son analyse.
-</div>
-      </div>
-      <div v-else>
-        <div class="titre-page">
-          <h1>{{ kw.titre }}</h1>
+  <div class="flex-1 flex flex-col min-h-0 bg-white dark:bg-gray-900 min-w-0">
+    <!-- Welcome Screen -->
+    <div v-if="!kw" class="flex-1 flex items-center justify-center p-8 text-center bg-gray-50 dark:bg-gray-950">
+      <UCard class="max-w-2xl shadow-xl border-dashed border-2 border-primary-200 dark:border-primary-800">
+        <div class="flex flex-col items-center gap-4">
+          <div class="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mb-2">
+            <UIcon name="i-lucide-tags" class="w-8 h-8 text-primary-600 dark:text-primary-400" />
+          </div>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-0">Navigation par Mots-clés</h2>
+          <div class="space-y-4 text-gray-600 dark:text-gray-400 leading-relaxed max-w-lg">
+            <p>
+              Cette section vous permet d’explorer les grands arrêts britanniques à travers une sélection de <strong>mots-clés juridiques</strong>.
+            </p>
+            <p>
+              Chaque mot-clé regroupe des commentaires associés à des décisions majeures, offrant une lecture transversale des enjeux doctrinaux et jurisprudentiels.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 text-sm text-primary-600 dark:text-primary-400 font-medium mt-4">
+            <UIcon name="i-lucide-arrow-left" class="animate-pulse" />
+            Choisissez un mot-clé dans la liste à gauche
+          </div>
         </div>
-        <div v-if="kw.introduction"> 
-        <Panel class="pr-2 pt-2" header="Introduction" toggleable>
-          <div v-html="kw.introduction"></div>
-        </Panel>
-      </div>
-        <!-- <h4>Commentaires associés</h4> -->
-        <div class="py-2 pr-2" style="text-align: left">
-          <DataTable
-            showGridlines
-            scrollable
-            :filters="filters"
-            :value="kw.commentaires"
-            tableStyle="min-width: 50rem"
-            :class="`p-datatable-sm`"
-            :globalFilterFields="[
-              'commentaires_id.titre',
-              'commentaires_id.source_id.titre',
-              'commentaires_id.auteur_id.last_name',
-              'commentaires_id.auteur_id.first_name',
-            ]"
-          >
-            <template #header>
-              <div class="flex justify-content-between">
-                <span class="p-input-icon-left">
-                  <i class="pi pi-search" />
-                  <InputText
-                    v-model="filters['global'].value"
-                    placeholder="Recherche (titre, source, auteur)"
-                    :class="`p-inputtext w-96`"
-                  />
-                </span>
-              </div>
-            </template>
-
-
-            
-            <Column
-              sortable
-              field="commentaires_id.titre"
-              header="Commentaires"
-            >
-            <template #body="slotSource">
-                <span class=" hover:bg-sky-200">
-                  <NuxtLink
-                    to="/sources"
-                    @click="
-                      setNavSource(
-                        slotSource.data.commentaires_id.source_id.id);
-                      setSelectedComment(
-                        slotSource.data.commentaires_id.id);
-                    "
-                    >{{ slotSource.data.commentaires_id.titre }}
-                  </NuxtLink>
-                </span>
-              </template>
-            </Column>
-
-
-            <Column
-              sortable
-              field="commentaires_id.source_id.titre"
-              header="Sources"
-            >
-              <template #body="slotSource">
-                <span class=" hover:bg-sky-200">
-                  <NuxtLink
-                    to="/sources"
-                    @click="
-                      setNavSource(
-                        slotSource.data.commentaires_id.source_id.id);
-                    "
-                    >{{ slotSource.data.commentaires_id.source_id.titre }}
-                  </NuxtLink>
-                </span>
-              </template>
-            </Column>
-
-
-            <Column field="commentaires_id.auteur_id" header="Auteur">
-              <template #body="slotAuteur">
-                <!-- {{ slotAuteur.data.commentaires_id.auteur_id}} -->
-                <span class="font-semibold hover:bg-sky-200">
-                  <NuxtLink
-                    :to="`/auteur-${slotAuteur.data.commentaires_id.auteur_id.last_name}`"
-                    >{{ slotAuteur.data.commentaires_id.auteur_id.first_name }}
-                    {{ slotAuteur.data.commentaires_id.auteur_id.last_name }}
-                  </NuxtLink>
-                </span>
-              </template>
-            </Column>
-
-            
-            <Column field="commentaires_id" header="">
-              <template #body="SlotCom">
-                <div class="flex justify-center">
-                  <Button
-                    class="mt-1 mx-1"
-                    @click="
-                      onCommentButtonClick(SlotCom.data.commentaires_id.id)
-                    "
-                  >
-                    Lire
-                  </Button>
-                </div>
-              </template>
-            </Column>
-          </DataTable>
-        </div>
-      </div>
+      </UCard>
     </div>
 
-    <Sidebar
-      v-model:visible="visible"
-      position="right"
-      :transitionOptions="'.3s cubic-bezier(0, 0, 0.2, 1)'"
-      class="layout-comment-sidebar bg-gray-50 w-fit"
+    <!-- Keyword Details -->
+    <template v-else>
+      <UScrollArea class="flex-1">
+        <div class="p-6 space-y-8 max-w-5xl mx-auto">
+          <!-- Header -->
+          <div class="border-b border-gray-100 dark:border-gray-800 pb-6">
+            <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-3">
+              <UIcon name="i-lucide-tag" class="text-primary-500" />
+              {{ kw.titre }}
+            </h1>
+          </div>
+
+          <!-- Introduction -->
+          <UCard v-if="kw.introduction" :ui="{ body: 'prose dark:prose-invert max-w-none' }">
+            <template #header>
+              <div class="flex items-center gap-2 font-semibold">
+                <UIcon name="i-lucide-info" class="text-primary-500" />
+                Introduction
+              </div>
+            </template>
+            <div v-html="kw.introduction"></div>
+          </UCard>
+
+          <!-- Associated Comments Table -->
+          <div class="space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <h2 class="text-xl font-bold flex items-center gap-2">
+                <UIcon name="i-lucide-message-square" class="text-primary-500" />
+                Commentaires associés
+              </h2>
+              <UInput
+                v-model="searchQuery"
+                icon="i-lucide-search"
+                placeholder="Filtrer..."
+                size="sm"
+                class="w-full sm:w-64"
+                clearable
+              />
+            </div>
+
+            <UTable
+              :data="filteredComments"
+              :columns="columns"
+              class="border border-gray-100 dark:border-gray-800 rounded-lg overflow-hidden"
+              :ui="{
+                thead: 'bg-gray-50 dark:bg-gray-800/50',
+                tr: 'hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors',
+                td: 'py-4'
+              }"
+            >
+              <!-- Commentaire -->
+              <template #commentaire-cell="{ row }">
+                <NuxtLink
+                  to="/sources"
+                  class="font-medium text-primary-600 dark:text-primary-400 hover:underline"
+                  @click="navigateToComment(row.original.commentaires_id)"
+                >
+                  {{ row.original.commentaires_id?.titre || 'Sans titre' }}
+                </NuxtLink>
+              </template>
+
+              <!-- Source -->
+              <template #source-cell="{ row }">
+                <NuxtLink
+                  v-if="row.original.commentaires_id?.source_id?.id"
+                  to="/sources"
+                  class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary-500 transition-colors"
+                  @click="navigateToSource(row.original.commentaires_id.source_id.id)"
+                >
+                  {{ row.original.commentaires_id.source_id.titre || 'Source sans titre' }}
+                </NuxtLink>
+                <span v-else class="text-sm text-gray-400">—</span>
+              </template>
+
+              <!-- Auteur -->
+              <template #auteur-cell="{ row }">
+                <NuxtLink
+                  v-if="row.original.commentaires_id?.auteur_id?.last_name"
+                  :to="`/auteur-${row.original.commentaires_id.auteur_id.last_name}`"
+                  class="text-sm font-semibold hover:text-primary-600 dark:hover:text-primary-400"
+                >
+                  {{ row.original.commentaires_id.auteur_id.first_name }} {{ row.original.commentaires_id.auteur_id.last_name }}
+                </NuxtLink>
+                <span v-else class="text-sm text-gray-400">—</span>
+              </template>
+
+              <!-- Action -->
+              <template #action-cell="{ row }">
+                <UButton
+                  size="xs"
+                  color="neutral"
+                  variant="ghost"
+                  icon="i-lucide-book-open"
+                  label="Lire"
+                  :disabled="!row.original.commentaires_id?.id"
+                  @click="openSidebar(row.original.commentaires_id?.id)"
+                />
+              </template>
+            </UTable>
+          </div>
+        </div>
+      </UScrollArea>
+    </template>
+
+    <!-- Slideover for Comment Side -->
+    <USlideover
+      v-model:open="isSidebarOpen"
+      title="Détails du commentaire"
+      :ui="{ width: 'max-w-xl' }"
     >
-      <CommentaireSide :com="selectedCom"> </CommentaireSide>
-    </Sidebar>
+      <div class="h-full bg-gray-50 dark:bg-gray-950 overflow-y-auto">
+        <CommentaireSide v-if="selectedComId" :com="selectedComId" @close="isSidebarOpen = false" />
+      </div>
+    </USlideover>
   </div>
 </template>
 
 <script setup>
-import { useNavStore } from "@/stores/navigation";
-import { useGlobalStore } from "~/stores/global";
-const navStore = useNavStore();
-const store = useGlobalStore();
-const props = defineProps(["sourceID"]);
-const selectedCom = ref("");
-const visible = ref(false);
-const filters = ref();
-// const commentaire_fetched=ref();
-
-const initFilters = () => {
-  filters.value = {
-    global: { value: null },
-  };
-};
-initFilters();
-
-const onCommentButtonClick = (com) => {
-  visible.value = !visible.value;
-  selectedCom.value = com;
-};
-
-function setNavSource(id) {
-  // console.log(id);
-  navStore.selectedSourceID = id;
-  navStore.comVisibility = false;
-  // navStore.navVisibility = false;
-}
-
-function setSelectedComment(id) {
-  // console.log(id);
-  navStore.comID = id
-  navStore.comVisibility = true;
-  navStore.navVisibility = false;
-}
-
-
-
-
-const kw = ref(false);
-
-onUpdated(() => {
-  kw.value = store.keywords.find(
-    (element) => element.id == navStore.selectedKeywordID
-  );
-});
-
-onMounted(() => {
-  try {
-    kw.value = store.keywords.find(
-      (element) => element.id == navStore.selectedKeywordID
-    );
-  } catch (error) {
-    console.log(error);
+const props = defineProps({
+  sourceID: {
+    type: [String, Number],
+    default: null
   }
 });
+
+const globalState = useGlobalState();
+const navState = useNavState();
+
+const isSidebarOpen = ref(false);
+const selectedComId = ref(null);
+const searchQuery = ref('');
+
+const kw = computed(() => {
+  const keywords = Array.isArray(globalState.value.keywords)
+    ? globalState.value.keywords
+    : [];
+
+  const selectedKeywordId = props.sourceID || navState.value.selectedKeywordID;
+
+  return keywords.find(k => k.id == selectedKeywordId) || null;
+});
+
+const columns = [
+  { accessorKey: 'commentaires_id.titre', header: 'Commentaire' },
+  { accessorKey: 'commentaires_id.source_id.titre', header: 'Source' },
+  { accessorKey: 'commentaires_id.auteur_id', header: 'Auteur' },
+  { accessorKey: 'action', header: '', class: 'w-20' }
+];
+
+const filteredComments = computed(() => {
+  const comments = Array.isArray(kw.value?.commentaires)
+    ? kw.value.commentaires.filter((item) => item?.commentaires_id)
+    : [];
+
+  if (!searchQuery.value) return comments;
+
+  const query = searchQuery.value.toLowerCase();
+  return comments.filter(c => {
+    const com = c.commentaires_id;
+    return (
+      com?.titre?.toLowerCase().includes(query) ||
+      com?.source_id?.titre?.toLowerCase().includes(query) ||
+      com?.auteur_id?.first_name?.toLowerCase().includes(query) ||
+      com?.auteur_id?.last_name?.toLowerCase().includes(query)
+    );
+  });
+});
+
+function openSidebar(id) {
+  if (!id) return;
+  selectedComId.value = id;
+  isSidebarOpen.value = true;
+}
+
+function navigateToSource(id) {
+  if (!id) return;
+  navState.value.selectedSourceID = id;
+  navState.value.comVisibility = false;
+}
+
+function navigateToComment(com) {
+  if (!com?.id || !com?.source_id?.id) return;
+  navState.value.selectedSourceID = com.source_id.id;
+  navState.value.comID = com.id;
+  navState.value.comVisibility = true;
+  navState.value.navVisibility = false;
+}
 </script>
