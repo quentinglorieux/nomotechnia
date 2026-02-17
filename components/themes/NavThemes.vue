@@ -23,7 +23,6 @@
     <div class="p-4 pb-2 border-b border-gray-100 dark:border-gray-800 shrink-0">
       <UInput
         v-model="searchQuery"
-        icon="i-lucide-search"
         leading
         placeholder="Rechercher..."
         size="md"

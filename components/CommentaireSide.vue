@@ -108,6 +108,12 @@ const fetched_data = ref();
 const { $directus } = useNuxtApp();
 async function retrieveCommentData(id) {
   if (!id) return;
+  // Clear old data to avoid visual flicker and scroll to top
+  fetched_data.value = null;
+  if (pdfSection.value) {
+    pdfSection.value.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   try {
     const data = await $directus.request({
       method: 'GET',
