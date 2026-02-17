@@ -1,15 +1,13 @@
 <template>
-  <div class="flex h-screen overflow-hidden bg-white dark:bg-gray-900">
+  <UDashboardGroup storage-key="themes-dashboard" class="relative flex-1 h-full min-h-0 overflow-hidden bg-white dark:bg-gray-900">
     <NavThemes
       :visible="navState.navVisibility"
-      class="shrink-0"
     />
 
     <MainThemes 
       :theme="navState.selectedThemeID" 
-      class="flex-1 min-w-0"
     />
-  </div>
+  </UDashboardGroup>
 </template>
 
 <script setup>

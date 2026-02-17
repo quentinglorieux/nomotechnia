@@ -1,63 +1,62 @@
 <template>
-  <div class="flex flex-col w-full h-full min-h-0 overflow-hidden">
-    <!-- Info Section if no source selected -->
-    <div v-if="!source" class="m-6 p-6 bg-slate-100 dark:bg-gray-800 rounded-lg shadow-sm border border-slate-200 dark:border-gray-700 lg:w-1/2">
-      <h3 class="text-xl font-bold text-slate-800 dark:text-gray-100 mb-4">Sélectionnez une Source</h3>
-      <div class="text-slate-700 dark:text-gray-300 leading-relaxed text-justify prose dark:prose-invert max-w-none">
-        <p>
-          Cette section répertorie les principales
-          <strong>décisions de justice britanniques</strong> analysées sur
-          Nomotechnia.
-        </p>
-        <p>
-          Vous y trouverez des arrêts sélectionnés pour leur portée doctrinale,
-          leur intérêt pédagogique ou leur valeur fondatrice.
-        </p>
-        <p>
-          Cliquez sur une source pour accéder à sa fiche complète. Celle-ci inclut
-          le texte de l’arrêt, des commentaires associés, les notions juridiques
-          mobilisées, ainsi que des liens vers les auteurs ou d'autres arrêts
-          connexes.
-        </p>
-        <p>
-          Vous pouvez aussi explorer les sources via les mots-clés ou les grands
-          thèmes accessibles depuis la page d’accueil.
-        </p>
-      </div>
-    </div>
-
-    <!-- Main Source Display -->
-    <div v-else class="flex flex-col h-full min-h-0 overflow-hidden">
-      <div class="px-6 py-4 bg-white dark:bg-gray-900 border-b border-slate-200 dark:border-gray-800">
-        <div class="flex justify-between items-center">
-          <div>
-            <h1 class="text-3xl font-bold text-slate-900 dark:text-white">{{ source.data.titre }}</h1>
-            <p v-if="source.data.meta" class="text-sm text-slate-500 dark:text-gray-400 mt-1">{{ source.data.meta }}</p>
-          </div>
-          <UBadge v-if="source.data.type_de_source" color="neutral" variant="soft">
+  <UDashboardPanel grow class="bg-white dark:bg-gray-900 border-none overflow-hidden">
+    <!-- Main Source Header -->
+    <template v-if="source" #header>
+      <div class="flex flex-col gap-1 min-w-0">
+        <div class="flex items-center gap-3 min-w-0">
+          <h1 class="text-xl font-bold text-gray-900 dark:text-white truncate">
+            {{ source.data.titre }}
+          </h1>
+          <UBadge v-if="source.data.type_de_source" color="neutral" variant="soft" size="sm" class="shrink-0">
             {{ source.data.type_de_source.Nom }}
           </UBadge>
         </div>
+        <p v-if="source.data.meta" class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ source.data.meta }}</p>
+      </div>
+    </template>
+
+    <!-- Main Body -->
+    <template #body>
+      <!-- Info Section if no source selected -->
+      <div v-if="!source" class="h-full flex flex-col items-center justify-center p-8 text-center bg-gray-50/50 dark:bg-gray-950/50">
+        <div class="max-w-md space-y-6">
+          <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 mb-2">
+            <UIcon name="i-lucide-book-open" class="w-10 h-10" />
+          </div>
+          
+          <div class="space-y-2">
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">
+              Sélectionnez une Source
+            </h3>
+            <p class="text-gray-500 dark:text-gray-400 leading-relaxed">
+              Cette section répertorie les principales décisions de justice britanniques analysées sur Nomotechnia.
+            </p>
+            <p class="text-gray-500 dark:text-gray-400 leading-relaxed">
+              Cliquez sur une source pour accéder à sa fiche complète : texte de l’arrêt, commentaires, notions juridiques et liens associés.
+            </p>
+          </div>
+        </div>
       </div>
 
-      <!-- Main Content Split view -->
-      <div class="flex flex-1 min-h-0 overflow-hidden" ref="splitContainer">
-        <!-- Left Pane: Content (resizable) -->
-        <div class="border-r border-slate-200 dark:border-gray-800 flex flex-col" :style="leftPaneStyle">
-          <UScrollArea class="flex-1 p-6 relative">
-            <FlexibleEditorContent
-              v-if="source?.data.content"
-              class="prose dark:prose-invert max-w-none"
-              :content="source.data.content"
-              :relation-marks="relationMarks"
-            />
+      <!-- Content Split View -->
+      <div v-else class="flex-1 min-h-0 flex overflow-hidden h-full">
+        <!-- Panel 1: Content -->
+        <div class="flex-1 min-w-0 overflow-y-auto bg-white dark:bg-gray-900">
+          <div class="p-8 max-w-4xl mx-auto w-full">
+            <div v-if="source.data.content" class="prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert prose-slate prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-white max-w-none">
+              <FlexibleEditorContent :content="source.data.content" :relation-marks="relationMarks" />
+            </div>
+            <div v-else class="flex flex-col items-center justify-center py-20 text-gray-500 dark:text-gray-400 italic">
+              <UIcon name="i-lucide-file-text" class="w-12 h-12 mb-4 opacity-20" />
+              Aucun contenu disponible pour cette source
+            </div>
 
             <!-- PDF Download Card -->
-            <UCard v-if="source?.data.fichiers?.length" class="mt-8">
+            <UCard v-if="source.data.fichiers?.length" class="mt-8 border-gray-200 dark:border-gray-800">
               <template #header>
                 <div class="flex items-center gap-2">
-                  <UIcon name="i-lucide-file-text" class="w-5 h-5 text-slate-500 dark:text-gray-400" />
-                  <h3 class="text-lg font-semibold dark:text-white">Documents associés</h3>
+                  <UIcon name="i-lucide-file-text" class="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Documents associés</h3>
                 </div>
               </template>
               
@@ -65,9 +64,9 @@
                 <li
                   v-for="(file, index) in source.data.fichiers"
                   :key="file.directus_files_id"
-                  class="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-gray-800/50 hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors"
+                  class="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 >
-                  <span class="text-sm font-medium text-slate-700 dark:text-gray-300">
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300 truncate mr-4">
                     {{ file.directus_files_id.filename_download || `Document ${index + 1}` }}
                   </span>
                   <UButton
@@ -79,29 +78,20 @@
                     size="xs"
                     color="neutral"
                     variant="soft"
+                    class="shrink-0"
                   />
                 </li>
               </ul>
             </UCard>
-          </UScrollArea>
+          </div>
         </div>
 
-        <!-- Draggable Separator -->
-        <div
-          class="w-2 cursor-col-resize bg-slate-200/80 hover:bg-primary-400 dark:bg-gray-700 dark:hover:bg-primary-600 transition-colors"
-          @mousedown="startResize"
-          role="separator"
-          aria-label="Redimensionner les panneaux"
-          aria-orientation="vertical"
-        />
-
-        <!-- Right Pane: Tabs and Details (resizable) -->
-        <div class="flex flex-col bg-slate-50 dark:bg-gray-950 min-h-0 overflow-hidden" :style="rightPaneStyle">
-          <div class="flex-1 flex flex-col min-h-0 overflow-hidden relative">
-            <!-- Source Tabs -->
-            <UTabs :items="sourceTabs" v-model:active-index="activeTabIndex" class="flex-1 flex flex-col overflow-hidden min-h-0">
+        <!-- Panel 2: Details & Links -->
+        <div class="w-136 min-w-md max-w-[42vw] border-l border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 flex flex-col min-h-0 overflow-hidden">
+          <div class="flex-1 flex flex-col min-h-0 overflow-hidden relative h-full">
+            <UTabs :items="sourceTabs" v-model:active-index="activeTabIndex" class="flex-1 flex flex-col overflow-hidden min-h-0 h-full">
               <template #content="{ item }">
-                <div class="flex-1 p-4 min-h-0 overflow-y-auto">
+                <div class="flex-1 p-4 min-h-0 overflow-y-auto h-full">
                   <div v-if="item.slot === 'before-tabs'">
                     <SourceGenericComments :comments="getCommentsByType(item.label)" />
                   </div>
@@ -129,13 +119,12 @@
               </template>
             </UTabs>
 
-            <!-- Selected Comment Detail Overlay -->
             <div 
               v-if="navState.comVisibility" 
-              class="absolute inset-x-0 bottom-0 top-0 bg-white dark:bg-gray-900 z-10 border-t border-slate-200 dark:border-gray-800 flex flex-col min-h-0 shadow-2xl transition-all duration-300 transform translate-y-0"
+              class="absolute inset-0 bg-white dark:bg-gray-900 z-10 border-t border-gray-200 dark:border-gray-800 flex flex-col min-h-0 shadow-2xl transition-all duration-300"
             >
-              <div class="flex items-center justify-between p-2 border-b border-slate-100 dark:border-gray-800 bg-slate-50 dark:bg-gray-950">
-                <div class="truncate font-semibold px-2 text-slate-700 dark:text-gray-200">
+              <div class="flex items-center justify-between p-2 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950">
+                <div class="truncate font-semibold px-2 text-sm text-gray-700 dark:text-gray-200">
                   {{ comTitre }}
                 </div>
                 <UButton
@@ -149,7 +138,7 @@
 
               <UTabs :items="commentDetailTabs" class="flex-1 flex flex-col overflow-hidden min-h-0">
                 <template #content="{ item }">
-                  <div class="flex-1 p-4 min-h-0 overflow-y-auto">
+                  <div class="flex-1 p-4 min-h-0 overflow-y-auto h-full">
                     <div v-if="item.slot === 'content'">
                       <CommentaireSide :com="navState.comID" />
                     </div>
@@ -163,8 +152,8 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
+    </template>
+  </UDashboardPanel>
 </template>
 
 <script setup>
@@ -188,19 +177,6 @@ const props = defineProps(["sourceID"]);
 const source = ref();
 const oldID = ref();
 const activeTabIndex = ref(2); // Default to 'Commentaires' tab
-const splitContainer = ref(null);
-const leftPaneWidth = ref(60);
-const isResizing = ref(false);
-
-const leftPaneStyle = computed(() => ({
-  flexBasis: `${leftPaneWidth.value}%`,
-  minWidth: '320px',
-}));
-
-const rightPaneStyle = computed(() => ({
-  flexBasis: `${100 - leftPaneWidth.value}%`,
-  minWidth: '320px',
-}));
 
 // Tab items for the source (right pane)
 const sourceTabs = computed(() => {
@@ -259,6 +235,7 @@ async function retrieveSourceData(id) {
 
   if (data.value) {
     source.value = { data: data.value };
+    activeTabIndex.value = commentTypesBefore.value.length;
     
     if (source.value.data.editor_nodes && source.value.data.content) {
       injectDataIntoContent(
@@ -286,6 +263,8 @@ onMounted(() => {
 
 watch(() => navState.value.selectedSourceID, (newVal) => {
   if (newVal && newVal !== oldID.value) {
+    navState.value.comVisibility = false;
+    activeTabIndex.value = commentTypesBefore.value.length;
     retrieveSourceData(newVal);
     oldID.value = newVal;
   }
@@ -359,28 +338,4 @@ const relationMarks = [
   { collection: "related_comments", component: RelatedComment },
 ];
 
-function startResize() {
-  isResizing.value = true;
-  window.addEventListener('mousemove', onResize);
-  window.addEventListener('mouseup', stopResize);
-}
-
-function onResize(event) {
-  if (!isResizing.value || !splitContainer.value) return;
-
-  const rect = splitContainer.value.getBoundingClientRect();
-  const next = ((event.clientX - rect.left) / rect.width) * 100;
-  leftPaneWidth.value = Math.min(80, Math.max(30, next));
-}
-
-function stopResize() {
-  if (!isResizing.value) return;
-  isResizing.value = false;
-  window.removeEventListener('mousemove', onResize);
-  window.removeEventListener('mouseup', stopResize);
-}
-
-onBeforeUnmount(() => {
-  stopResize();
-});
 </script>

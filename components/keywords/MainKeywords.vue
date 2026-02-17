@@ -1,4 +1,5 @@
 <template>
+
   <div class="flex-1 flex flex-col min-h-0 bg-white dark:bg-gray-900 min-w-0">
     <!-- Welcome Screen -->
     <div v-if="!kw" class="flex-1 flex items-center justify-center p-8 text-center bg-gray-50 dark:bg-gray-950">
@@ -26,7 +27,7 @@
 
     <!-- Keyword Details -->
     <template v-else>
-      <UScrollArea class="flex-1">
+      <div class="flex-1">
         <div class="p-6 space-y-8 max-w-5xl mx-auto">
           <!-- Header -->
           <div class="border-b border-gray-100 dark:border-gray-800 pb-6">
@@ -58,13 +59,15 @@
                 v-model="searchQuery"
                 icon="i-lucide-search"
                 placeholder="Filtrer..."
-                size="sm"
-                class="w-full sm:w-64"
+                size="md"
+                :ui="{ base: 'ps-6' }"
+                class="w-full px-6 sm:w-64"
                 clearable
               />
             </div>
 
             <UTable
+              v-if="filteredComments.length > 0"
               :data="filteredComments"
               :columns="columns"
               class="border border-gray-100 dark:border-gray-800 rounded-lg overflow-hidden"
@@ -80,6 +83,7 @@
                   to="/sources"
                   class="font-medium text-primary-600 dark:text-primary-400 hover:underline"
                   @click="navigateToComment(row.original.commentaires_id)"
+                  
                 >
                   {{ row.original.commentaires_id?.titre || 'Sans titre' }}
                 </NuxtLink>
@@ -105,6 +109,7 @@
                   :to="`/auteur-${row.original.commentaires_id.auteur_id.last_name}`"
                   class="text-sm font-semibold hover:text-primary-600 dark:hover:text-primary-400"
                 >
+               
                   {{ row.original.commentaires_id.auteur_id.first_name }} {{ row.original.commentaires_id.auteur_id.last_name }}
                 </NuxtLink>
                 <span v-else class="text-sm text-gray-400">—</span>
@@ -123,9 +128,20 @@
                 />
               </template>
             </UTable>
+
+            <!-- Empty State -->
+            <div v-else class="flex flex-col items-center justify-center p-12 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-xl space-y-4">
+              <div class="w-12 h-12 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center">
+                <UIcon name="i-lucide-message-square-off" class="text-gray-400 text-xl" />
+              </div>
+              <div class="text-center">
+                <p class="text-lg font-semibold text-gray-900 dark:text-white">Aucun commentaire associé</p>
+                <p class="text-sm text-gray-500">Essayez un autre mot-clé ou modifiez vos filtres.</p>
+              </div>
+            </div>
           </div>
         </div>
-      </UScrollArea>
+      </div>
     </template>
 
     <!-- Slideover for Comment Side -->
@@ -142,6 +158,8 @@
 </template>
 
 <script setup>
+const { $directus } = useNuxtApp();
+
 const props = defineProps({
   sourceID: {
     type: [String, Number],
@@ -156,6 +174,31 @@ const isSidebarOpen = ref(false);
 const selectedComId = ref(null);
 const searchQuery = ref('');
 
+const { data: commentsData } = await useAsyncData('keywords-commentaires', async () => {
+  const response = await $directus.request({
+    method: 'GET',
+    path: '/items/commentaires',
+    params: {
+      fields: [
+        'id',
+        'titre',
+        'auteur_id.first_name',
+        'auteur_id.last_name',
+        'source_id.id',
+        'source_id.titre',
+        'keywords_id.keywords_id.id'
+      ],
+      sort: ['titre']
+    }
+  });
+
+  return Array.isArray(response)
+    ? response
+    : Array.isArray(response?.data)
+      ? response.data
+      : [];
+});
+
 const kw = computed(() => {
   const keywords = Array.isArray(globalState.value.keywords)
     ? globalState.value.keywords
@@ -167,21 +210,39 @@ const kw = computed(() => {
 });
 
 const columns = [
-  { accessorKey: 'commentaires_id.titre', header: 'Commentaire' },
-  { accessorKey: 'commentaires_id.source_id.titre', header: 'Source' },
-  { accessorKey: 'commentaires_id.auteur_id', header: 'Auteur' },
+  { accessorKey: 'commentaires_id.titre', header: 'Commentaire', class: 'min-w-[300px]' },
+  { accessorKey: 'commentaires_id.source_id.titre', header: 'Source', class: 'min-w-[200px]' },
+  { accessorKey: 'commentaires_id.auteur_id', header: 'Auteur', class: 'min-w-[150px]' },
   { accessorKey: 'action', header: '', class: 'w-20' }
 ];
 
 const filteredComments = computed(() => {
-  const comments = Array.isArray(kw.value?.commentaires)
-    ? kw.value.commentaires.filter((item) => item?.commentaires_id)
+  const selectedKeywordId = kw.value?.id;
+
+  const directRelationComments = Array.isArray(kw.value?.commentaires)
+    ? kw.value.commentaires
+      .filter((item) => item?.commentaires_id)
+      .map((item) => item.commentaires_id)
     : [];
 
-  if (!searchQuery.value) return comments;
+  const fallbackComments = Array.isArray(commentsData.value)
+    ? commentsData.value.filter((comment) => {
+      if (!Array.isArray(comment?.keywords_id) || !selectedKeywordId) return false;
+
+      return comment.keywords_id.some((relation) => {
+        const relatedKeywordId = relation?.keywords_id?.id ?? relation?.keywords_id;
+        return String(relatedKeywordId) === String(selectedKeywordId);
+      });
+    })
+    : [];
+
+  const normalizedRows = (directRelationComments.length ? directRelationComments : fallbackComments)
+    .map((comment) => ({ commentaires_id: comment }));
+
+  if (!searchQuery.value) return normalizedRows;
 
   const query = searchQuery.value.toLowerCase();
-  return comments.filter(c => {
+  return normalizedRows.filter(c => {
     const com = c.commentaires_id;
     return (
       com?.titre?.toLowerCase().includes(query) ||

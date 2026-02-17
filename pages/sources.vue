@@ -1,16 +1,14 @@
 <template>
-  <div class="flex h-full min-h-0 overflow-hidden bg-white dark:bg-gray-900">
+  <UDashboardGroup storage-key="sources-dashboard" class="relative flex-1 h-full min-h-0 overflow-hidden bg-white dark:bg-gray-900">
     <NavSource
-      v-if="globalState.sources"
+      v-if="globalState.sources && navState.navVisibility"
       :visible="navState.navVisibility"
-      class="shrink-0"
     />
 
     <MainSource 
       :sourceID="navState.selectedSourceID" 
-      class="flex-1 min-w-0 min-h-0"
     />
-  </div>
+  </UDashboardGroup>
 </template>
 
 <script setup>
@@ -34,8 +32,25 @@ const { data } = await useAsyncData('sources-nav', async () => {
       sort: ['titre']
     }
   });
-  
-  globalState.value.sources = response;
-  return response;
+
+  const sources = Array.isArray(response)
+    ? response
+    : Array.isArray(response?.data)
+      ? response.data
+      : [];
+
+  globalState.value.sources = sources;
+  return sources;
 });
+
+watch(
+  () => globalState.value.sources,
+  (sources) => {
+    if (!navState.value.selectedSourceID && Array.isArray(sources) && sources.length) {
+      navState.value.selectedSourceID = sources[0].id;
+      navState.value.comVisibility = false;
+    }
+  },
+  { immediate: true, deep: true }
+);
 </script>
