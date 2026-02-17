@@ -34,18 +34,18 @@
 
     <!-- List Area -->
     <template #body>
-      <div class="py-1">
+      <div v-if="filteredItems.length" class="py-1 text-sm">
         <button
           v-for="item in filteredItems"
           :key="item.id"
           type="button"
-          class="w-full px-4 py-2.5 text-left hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors"
+          class="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors"
           :title="item.titre"
           @click="selectKeyword(item)"
         >
           <div class="flex items-center justify-between gap-2 w-full">
             <span :class="[
-              'text-sm leading-snug truncate whitespace-nowrap',
+              'truncate whitespace-nowrap',
               navState.selectedKeywordID === item.id ? 'font-bold text-primary-600 dark:text-primary-400' : 'text-gray-600 dark:text-gray-300'
             ]">
               {{ item.titre }}
@@ -61,6 +61,10 @@
             </UBadge>
           </div>
         </button>
+      </div>
+      <div v-else class="flex flex-col items-center justify-center p-8 text-center space-y-2">
+        <UIcon name="i-lucide-tags" class="text-gray-300 dark:text-gray-700 text-3xl mb-2" />
+        <p class="text-sm font-medium text-gray-500">Aucun mot-clé trouvé</p>
       </div>
     </template>
   </UDashboardPanel>

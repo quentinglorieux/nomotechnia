@@ -4,17 +4,24 @@
     <AppTopbar />
 
     <!-- Main Content Area -->
-    <main class="relative flex-1 min-h-0 flex flex-col overflow-hidden">
+    <main :class="mainClass">
       <slot />
     </main>
 
     <!-- Global Footer -->
-    <AppFooter />
+    <AppFooter v-if="isHomePage" />
   </div>
 </template>
 
 <script setup>
-// Modern Nuxt 4 layout with Nuxt UI 4
+const route = useRoute()
+
+const isHomePage = computed(() => route.path === '/')
+
+const mainClass = computed(() => [
+  'relative flex-1 min-h-0 flex flex-col',
+  isHomePage.value ? 'overflow-y-auto' : 'overflow-hidden'
+])
 </script>
 
 <style>

@@ -23,22 +23,22 @@
       <!-- Right COLUMN: Intro Content -->
       <main class="lg:col-span-9 bg-white dark:bg-gray-900 p-8 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm prose dark:prose-invert max-w-none">
         <div class="space-y-6">
-          <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-800 pb-4 mt-0">
+          <h1 class="text-3xl font-semibold tracking-tight text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-800 pb-4 mt-0">
              Qu’est-ce que Nomotechnia ?
           </h1>
           
-          <div class="flex items-center gap-2 text-xl italic text-primary-600 dark:text-primary-400">
+          <div class="flex items-center gap-2 text-lg italic text-primary-600 dark:text-primary-400">
             <span></span>
-            <em>Lire, comprendre, commenter les grands arrêts britanniques</em>
+            <em>"Lire, comprendre, commenter les grands arrêts britanniques"</em>
           </div>
 
-          <p class="text-lg leading-relaxed text-gray-700 dark:text-gray-300">
+          <p class="text-md leading-relaxed text-gray-700 dark:text-gray-300">
             <strong class="text-gray-900 dark:text-white">Nomotechnia</strong> est une plateforme collaborative dédiée
             à l’étude, à l’annotation et à la compréhension des grands arrêts de
             la jurisprudence britannique.
           </p>
 
-          <p class="text-lg leading-relaxed text-gray-700 dark:text-gray-300">
+          <p class="text-md leading-relaxed text-gray-700 dark:text-gray-300">
             Notre objectif : offrir un outil structurant pour naviguer dans la
             complexité du droit à travers
             <strong class="text-gray-900 dark:text-white">les décisions de justice majeures</strong>, enrichies par
@@ -49,7 +49,7 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 border-t border-gray-100 dark:border-gray-800">
             <section>
-              <h2 class="text-2xl font-bold flex items-center gap-2 mb-4 mt-0 text-gray-900 dark:text-white">
+              <h2 class="text-xl font-bold flex items-center gap-2 mb-4 mt-0 text-gray-900 dark:text-white">
                 <UIcon name="i-lucide-search" class="text-primary-500" />
                 Ce que vous trouverez
               </h2>
@@ -62,7 +62,7 @@
             </section>
 
             <section>
-              <h2 class="text-2xl font-bold flex items-center gap-2 mb-4 mt-0 text-gray-900 dark:text-white">
+              <h2 class="text-xl font-bold flex items-center gap-2 mb-4 mt-0 text-gray-900 dark:text-white">
                 <UIcon name="i-lucide-compass" class="text-primary-500" />
                 Pour commencer
               </h2>
@@ -75,8 +75,8 @@
             </section>
           </div>
 
-          <div class="bg-primary-50 dark:bg-primary-900/10 p-6 rounded-xl border border-primary-100 dark:border-primary-800 mt-8">
-            <h2 class="text-2xl font-bold text-primary-900 dark:text-primary-100 mb-4 mt-0">Contribuer</h2>
+          <div class="bg-primary-100 dark:bg-primary-900/10 p-4 rounded border border-primary-100 dark:border-primary-800 mt-8">
+            <h2 class="text-xl font-bold text-primary-900 dark:text-primary-100 mb-4 mt-0">Contribuer</h2>
             <p class="mb-0 text-primary-800 dark:text-primary-200">
               Juriste, enseignant, étudiant ? Vous pouvez
               <strong class="text-primary-900 dark:text-white">proposer un commentaire</strong>,

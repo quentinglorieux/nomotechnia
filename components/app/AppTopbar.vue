@@ -16,16 +16,7 @@
         </NuxtLink>
         <NuxtLink to="/keywords" class="inline-flex items-center gap-1 hover:text-primary-600 dark:hover:text-primary-400">
           <UIcon name="i-lucide-tags" class="w-4 h-4" />
-          Mots-clés
-          <UBadge
-            v-if="keywordCommentsCount"
-            color="neutral"
-            variant="soft"
-            size="sm"
-            class="ml-1 font-mono shrink-0"
-          >
-            {{ keywordCommentsCount }}
-          </UBadge>
+          Mots clés
         </NuxtLink>
 
         <div 

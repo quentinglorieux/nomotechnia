@@ -1,4 +1,5 @@
 <template>
+  
   <mark
     class="cursor-pointer bg-yellow-400/30 dark:bg-yellow-600/30 hover:bg-yellow-400/50 dark:hover:bg-yellow-600/50 px-1 rounded transition-colors"
     :data-linkedcomment="props.data"

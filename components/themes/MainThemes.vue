@@ -21,7 +21,7 @@
       </div>
 
       <!-- Details -->
-      <div v-else class="p-6 space-y-8 w-full max-w-5xl mr-auto">
+      <div v-else class="p-6 space-y-8 w-full  mr-auto">
         <!-- Header -->
         <div class="border-b border-gray-100 dark:border-gray-800 pb-6">
           <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-3">

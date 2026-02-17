@@ -22,7 +22,6 @@
           </div>
         </button>
       </div>
-
       <CommentaireSide
         v-if="selectedCommentId"
         :key="selectedCommentId"

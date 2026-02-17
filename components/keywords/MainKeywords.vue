@@ -1,6 +1,6 @@
 <template>
-
-  <div class="flex-1 flex flex-col min-h-0 bg-white dark:bg-gray-900 min-w-0">
+  <UDashboardPanel class="flex-1 flex flex-col min-h-0 bg-white dark:bg-gray-900 min-w-0">
+    <template #body>
     <!-- Welcome Screen -->
     <div v-if="!kw" class="flex-1 flex items-center justify-center p-8 text-center bg-gray-50 dark:bg-gray-950">
       <UCard class="max-w-2xl shadow-xl border-dashed border-2 border-primary-200 dark:border-primary-800">
@@ -27,8 +27,7 @@
 
     <!-- Keyword Details -->
     <template v-else>
-      <div class="flex-1">
-        <div class="p-6 space-y-8 max-w-5xl mx-auto">
+      <div class="p-6 space-y-8 w-full mr-auto">
           <!-- Header -->
           <div class="border-b border-gray-100 dark:border-gray-800 pb-6">
             <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-3">
@@ -70,18 +69,21 @@
               v-if="filteredComments.length > 0"
               :data="filteredComments"
               :columns="columns"
-              class="border border-gray-100 dark:border-gray-800 rounded-lg overflow-hidden"
+              class="w-full border border-gray-100 dark:border-gray-800 rounded-lg overflow-hidden"
               :ui="{
+                base: 'table-fixed min-w-full',
                 thead: 'bg-gray-50 dark:bg-gray-800/50',
                 tr: 'hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors',
-                td: 'py-4'
+                th: 'whitespace-nowrap',
+                td: 'py-4 whitespace-nowrap overflow-hidden text-ellipsis'
               }"
             >
               <!-- Commentaire -->
               <template #commentaire-cell="{ row }">
                 <NuxtLink
                   to="/sources"
-                  class="font-medium text-primary-600 dark:text-primary-400 hover:underline"
+                  class="block w-full truncate font-medium text-primary-600 dark:text-primary-400 hover:underline"
+                  :title="row.original.commentaires_id?.titre || 'Sans titre'"
                   @click="navigateToComment(row.original.commentaires_id)"
                   
                 >
@@ -94,7 +96,8 @@
                 <NuxtLink
                   v-if="row.original.commentaires_id?.source_id?.id"
                   to="/sources"
-                  class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary-500 transition-colors"
+                  class="block w-full truncate text-sm text-gray-600 dark:text-gray-400 hover:text-primary-500 transition-colors"
+                  :title="row.original.commentaires_id.source_id.titre || 'Source sans titre'"
                   @click="navigateToSource(row.original.commentaires_id.source_id.id)"
                 >
                   {{ row.original.commentaires_id.source_id.titre || 'Source sans titre' }}
@@ -107,7 +110,8 @@
                 <NuxtLink
                   v-if="row.original.commentaires_id?.auteur_id?.last_name"
                   :to="`/auteur-${row.original.commentaires_id.auteur_id.last_name}`"
-                  class="text-sm font-semibold hover:text-primary-600 dark:hover:text-primary-400"
+                  class="block w-full truncate text-sm font-semibold hover:text-primary-600 dark:hover:text-primary-400"
+                  :title="`${row.original.commentaires_id.auteur_id.first_name || ''} ${row.original.commentaires_id.auteur_id.last_name || ''}`.trim()"
                 >
                
                   {{ row.original.commentaires_id.auteur_id.first_name }} {{ row.original.commentaires_id.auteur_id.last_name }}
@@ -116,17 +120,8 @@
               </template>
 
               <!-- Action -->
-              <template #action-cell="{ row }">
-                <UButton
-                  size="xs"
-                  color="neutral"
-                  variant="ghost"
-                  icon="i-lucide-book-open"
-                  label="Lire"
-                  :disabled="!row.original.commentaires_id?.id"
-                  @click="openSidebar(row.original.commentaires_id?.id)"
-                />
-              </template>
+     
+
             </UTable>
 
             <!-- Empty State -->
@@ -140,7 +135,6 @@
               </div>
             </div>
           </div>
-        </div>
       </div>
     </template>
 
@@ -154,7 +148,8 @@
         <CommentaireSide v-if="selectedComId" :com="selectedComId" @close="isSidebarOpen = false" />
       </div>
     </USlideover>
-  </div>
+    </template>
+  </UDashboardPanel>
 </template>
 
 <script setup>
@@ -210,10 +205,42 @@ const kw = computed(() => {
 });
 
 const columns = [
-  { accessorKey: 'commentaires_id.titre', header: 'Commentaire', class: 'min-w-[300px]' },
-  { accessorKey: 'commentaires_id.source_id.titre', header: 'Source', class: 'min-w-[200px]' },
-  { accessorKey: 'commentaires_id.auteur_id', header: 'Auteur', class: 'min-w-[150px]' },
-  { accessorKey: 'action', header: '', class: 'w-20' }
+  {
+    id: 'commentaire',
+    accessorKey: 'commentaires_id.titre',
+    header: 'Commentaire',
+    size: 540,
+    meta: {
+      class: {
+        th: 'w-[42%] max-w-0',
+        td: 'w-[42%] max-w-0'
+      }
+    }
+  },
+  {
+    id: 'source',
+    accessorKey: 'commentaires_id.source_id.titre',
+    header: 'Source',
+    size: 260,
+    meta: {
+      class: {
+        th: 'w-[28%] max-w-0',
+        td: 'w-[28%] max-w-0'
+      }
+    }
+  },
+  {
+    id: 'auteur',
+    accessorKey: 'commentaires_id.auteur_id',
+    header: 'Auteur',
+    size: 150,
+    meta: {
+      class: {
+        th: 'w-[20%] max-w-0',
+        td: 'w-[20%] max-w-0'
+      }
+    }
+  }
 ];
 
 const filteredComments = computed(() => {

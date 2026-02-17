@@ -2,16 +2,16 @@
   <UDashboardPanel grow class="bg-white dark:bg-gray-900 border-none overflow-hidden">
     <!-- Main Source Header -->
     <template v-if="source" #header>
-      <div class="flex flex-col gap-1 min-w-0">
-        <div class="flex items-center gap-3 min-w-0">
-          <h1 class="text-xl font-bold text-gray-900 dark:text-white truncate">
+      <div class="flex flex-col min-w-0">
+        <div class="flex items-center gap-3 min-w-0 bg-slate-200">
+          <h1 class="text-xl font-bold text-gray-100 bg-slate-900 dark:text-slate-900 dark:bg-slate-100 px-3 py-10 w-4/5">
             {{ source.data.titre }}
           </h1>
-          <UBadge v-if="source.data.type_de_source" color="neutral" variant="soft" size="sm" class="shrink-0">
+          <UBadge v-if="source.data.type_de_source" color="neutral" variant="soft" size="sm" class="shrink-0 pr-2 w-1/5">
             {{ source.data.type_de_source.Nom }}
           </UBadge>
         </div>
-        <p v-if="source.data.meta" class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ source.data.meta }}</p>
+        <p v-if="source.data.meta" class="text-sm font-medium text-gray-100 pl-3 py-2 bg-slate-500 dark:text-gray-400 ">{{ source.data.meta }}</p>
       </div>
     </template>
 
@@ -87,9 +87,9 @@
         </div>
 
         <!-- Panel 2: Details & Links -->
-        <div class="w-136 min-w-md max-w-[42vw] border-l border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 flex flex-col min-h-0 overflow-hidden">
+        <div class="w-[34rem] min-w-md max-w-[42vw] border-l border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 flex flex-col min-h-0 overflow-hidden">
           <div class="flex-1 flex flex-col min-h-0 overflow-hidden relative h-full">
-            <UTabs :items="sourceTabs" v-model:active-index="activeTabIndex" class="flex-1 flex flex-col overflow-hidden min-h-0 h-full">
+            <UTabs :items="sourceTabs" v-model="activeTabIndex" class="flex-1 flex flex-col overflow-hidden min-h-0 h-full">
               <template #content="{ item }">
                 <div class="flex-1 p-4 min-h-0 overflow-y-auto h-full">
                   <div v-if="item.slot === 'before-tabs'">
@@ -114,7 +114,9 @@
 
                   <div v-else-if="item.slot === 'after-tabs'">
                     <SourceGenericComments :comments="getCommentsByType(item.label)" />
+          
                   </div>
+                
                 </div>
               </template>
             </UTabs>
@@ -135,7 +137,6 @@
                   @click="navState.comVisibility = false"
                 />
               </div>
-
               <UTabs :items="commentDetailTabs" class="flex-1 flex flex-col overflow-hidden min-h-0">
                 <template #content="{ item }">
                   <div class="flex-1 p-4 min-h-0 overflow-y-auto h-full">
@@ -148,6 +149,7 @@
                   </div>
                 </template>
               </UTabs>
+           
             </div>
           </div>
         </div>
@@ -176,7 +178,7 @@ const { $directus } = useNuxtApp();
 const props = defineProps(["sourceID"]);
 const source = ref();
 const oldID = ref();
-const activeTabIndex = ref(2); // Default to 'Commentaires' tab
+const activeTabIndex = ref('Commentaires'); // Default to 'Commentaires' tab
 
 // Tab items for the source (right pane)
 const sourceTabs = computed(() => {
@@ -184,17 +186,17 @@ const sourceTabs = computed(() => {
   
   // Before tabs
   commentTypesBefore.value.forEach(typeNom => {
-    tabs.push({ label: typeNom, slot: 'before-tabs', value: `before-${typeNom}` });
+    tabs.push({ label: typeNom, value: typeNom, slot: 'before-tabs' });
   });
 
   // Main tabs
-  tabs.push({ label: 'Commentaires', slot: 'main-comments', value: 2 });
-  tabs.push({ label: 'Mots-clés', slot: 'keywords', value: 3 });
-  tabs.push({ label: 'Thèmes', slot: 'themes', value: 4 });
+  tabs.push({ label: 'Commentaires', value: 'Commentaires', slot: 'main-comments' });
+  tabs.push({ label: 'Mots-clés', value: 'Mots-clés', slot: 'keywords' });
+  tabs.push({ label: 'Thèmes', value: 'Thèmes', slot: 'themes' });
 
   // After tabs
   commentTypesAfter.value.forEach(typeNom => {
-    tabs.push({ label: typeNom, slot: 'after-tabs', value: `after-${typeNom}` });
+    tabs.push({ label: typeNom, value: typeNom, slot: 'after-tabs' });
   });
 
   return tabs;
@@ -235,7 +237,7 @@ async function retrieveSourceData(id) {
 
   if (data.value) {
     source.value = { data: data.value };
-    activeTabIndex.value = commentTypesBefore.value.length;
+    activeTabIndex.value = 'Commentaires';
     
     if (source.value.data.editor_nodes && source.value.data.content) {
       injectDataIntoContent(
