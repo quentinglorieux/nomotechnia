@@ -7,27 +7,23 @@
         
         <div class="flex-1 min-w-0 flex flex-col">
           <div class="flex items-center gap-2">
-            <h1 class="text-lg font-semibold text-gray-100 dark:text-white py-6 px-2 bg-slate-900 w-4/5">
+            <h1 class="text-lg font-semibold text-gray-100 dark:text-white py-6 px-4 bg-slate-900 w-4/5">
               {{ source?.data?.titre || 'Chargement...' }}
             </h1>
             <UBadge v-if="source?.data?.type_de_source" color="neutral" variant="soft" size="xs" class="shrink-0 uppercase tracking-tighter  w-1/5">
               {{ source?.data?.type_de_source?.Nom }}
             </UBadge>
           </div>
-          <p v-if="source?.data?.meta" class="text-sm text-gray-900 dark:text-gray-400 bg-slate-300 truncate font-medium py-2 px-2">{{ source?.data?.meta }}</p>
+          <p v-if="source?.data?.meta" class="text-sm text-gray-900 dark:text-gray-400 bg-slate-300 truncate font-medium py-2 px-4">{{ source?.data?.meta }}</p>
         </div>
       </div>
-      <div v-else class="flex items-center gap-3 w-full px-4 py-2 border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur shrink-0">
-        <UDashboardSidebarToggle class="md:hidden" />
-        <UDashboardSidebarCollapse class="hidden md:flex" />
-        <span class="text-sm font-medium text-gray-500 italic">Sélectionnez une source...</span>
-      </div>
+
     </template>
 
     <!-- Main Body -->
     <template #body>
-      <UDashboardSidebarToggle class="md:hidden" />
-      <UDashboardSidebarCollapse class="hidden md:flex" />
+      <UDashboardSidebarToggle class="md:hidden " />
+      <UDashboardSidebarCollapse class="hidden md:flex " />
       <!-- Info Section if no source selected -->
       <div v-if="!source?.data" class="h-full w-full flex flex-col items-center justify-center p-8 text-center bg-gray-50/50 dark:bg-gray-950/50">
         <div class="max-w-md space-y-6">
