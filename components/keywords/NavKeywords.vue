@@ -1,83 +1,76 @@
 <template>
-  <UDashboardPanel id="nav-keywords" resizable :min-size="20" :default-size="30" :max-size="40" class="w-80 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+  <UDashboardSidebar
+    id="nav-keywords"
+    v-model:open="navState.navOpen"
+    v-model:collapsed="isCollapsed"
+    collapsible
+    resizable
+    side="left"
+    :width="300"
+    :ui="{ root: 'relative hidden md:flex flex-col shrink-0 border-e border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900' }"
+    class="bg-white dark:bg-gray-900"
+  >
     <template #header>
-      <div class="flex flex-col w-full gap-4">
-        <!-- Title -->
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2 font-semibold text-lg mx-6 pt-2 text-gray-700 dark:text-gray-200 uppercase tracking-wider">
-            <UIcon name="i-lucide-tags" class="w-4 h-4" />
-            MOTS CLÉS
-          </div>
-          <UButton
-            v-if="visible"
-            icon="i-lucide-chevrons-left"
-            variant="ghost"
-            color="neutral"
-            size="sm"
-            @click="navState.navVisibility = !navState.navVisibility"
-            aria-label="Fermer le menu"
-          />
+      <div class="flex items-center gap-3 w-full px-4 py-2 border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur shrink-0">
+        <UDashboardSidebarCollapse class="hidden md:flex" />
+        <div class="flex items-center gap-2 font-semibold text-sm text-gray-700 dark:text-gray-200 uppercase tracking-wider">
+          <UIcon name="i-lucide-tags" class="w-4 h-4" />
+          MOTS CLÉS
         </div>
-
-        <!-- Search Area -->
-        <UInput
-          v-model="searchQuery"
-          icon="i-lucide-search"
-          placeholder="Rechercher un mot-clé..."
-          size="md"
-          :ui="{ base: 'ps-6' }"
-          class="w-full px-6"
-          clearable
-        />
       </div>
     </template>
 
-    <!-- List Area -->
-    <template #body>
-      <div v-if="filteredItems.length" class="py-1 text-sm">
+    <div class="p-4 pb-2 border-b border-gray-100 dark:border-gray-800 shrink-0">
+      <UInput
+        v-model="searchQuery"
+        icon="i-lucide-search"
+        leading
+        placeholder="Rechercher..."
+        size="md"
+        variant="subtle"
+        class="w-full"
+      />
+    </div>
+
+    <UScrollArea class="flex-1 min-h-0">
+      <div class="divide-y divide-gray-100 dark:divide-gray-800">
         <button
           v-for="item in filteredItems"
           :key="item.id"
-          type="button"
-          class="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors"
-          :title="item.titre"
+          class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group relative"
+          :class="navState.selectedKeywordID === item.id ? 'bg-primary-50 dark:bg-primary-900/10' : ''"
           @click="selectKeyword(item)"
         >
-          <div class="flex items-center justify-between gap-2 w-full">
-            <span :class="[
-              'truncate whitespace-nowrap',
-              navState.selectedKeywordID === item.id ? 'font-bold text-primary-600 dark:text-primary-400' : 'text-gray-600 dark:text-gray-300'
-            ]">
+          <div v-if="navState.selectedKeywordID === item.id" class="absolute left-0 top-0 bottom-0 w-1 bg-primary-500" />
+          
+          <div class="flex items-center justify-between gap-2">
+            <span 
+              class="text-sm font-medium line-clamp-2 leading-snug"
+              :class="navState.selectedKeywordID === item.id ? 'text-primary-900 dark:text-primary-100' : 'text-gray-700 dark:text-gray-200'"
+            >
               {{ item.titre }}
             </span>
             <UBadge
               v-if="item.commentaires?.length"
-              color="neutral"
-              variant="soft"
+              :label="item.commentaires.length"
+              color="primary"
+              variant="subtle"
               size="sm"
-              class="font-mono shrink-0"
-            >
-              {{ item.commentaires.length }}
-            </UBadge>
+              class="shrink-0 rounded-full font-bold px-2"
+            />
           </div>
         </button>
       </div>
-      <div v-else class="flex flex-col items-center justify-center p-8 text-center space-y-2">
-        <UIcon name="i-lucide-tags" class="text-gray-300 dark:text-gray-700 text-3xl mb-2" />
-        <p class="text-sm font-medium text-gray-500">Aucun mot-clé trouvé</p>
+
+      <div v-if="!filteredItems.length" class="p-8 text-center text-sm text-gray-500 dark:text-gray-400 italic">
+        <UIcon name="i-lucide-search-x" class="w-8 h-8 mb-2 mx-auto opacity-20" />
+        Aucun mot-clé trouvé
       </div>
-    </template>
-  </UDashboardPanel>
+    </UScrollArea>
+  </UDashboardSidebar>
 </template>
 
 <script setup>
-const props = defineProps({
-  visible: {
-    type: Boolean,
-    default: true
-  }
-});
-
 const globalState = useGlobalState();
 const navState = useNavState();
 
@@ -96,9 +89,16 @@ const filteredItems = computed(() => {
   );
 });
 
+const isCollapsed = computed({
+  get: () => !navState.value.navVisibility,
+  set: (val) => {
+    navState.value.navVisibility = !val;
+  }
+});
+
 function selectKeyword(selected) {
   if (!selected?.id) return;
-
   navState.value.selectedKeywordID = selected.id;
+  navState.value.navOpen = false;
 }
 </script>

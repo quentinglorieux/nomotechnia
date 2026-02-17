@@ -8,7 +8,7 @@
           v-for="item in items" 
           :key="item.to" 
           :to="item.to"
-          class="flex items-center gap-4 p-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-primary-50 dark:hover:bg-primary-900/10 hover:border-primary-200 dark:hover:border-primary-800 transition-all group shadow-sm"
+          class="flex items-center gap-4 p-4 rounded border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-primary-50 dark:hover:bg-primary-900/10 hover:border-primary-200 dark:hover:border-primary-800 transition-all group shadow-sm"
         >
           <UIcon 
             :name="item.icon" 
@@ -21,13 +21,13 @@
       </nav>
 
       <!-- Right COLUMN: Intro Content -->
-      <main class="lg:col-span-9 bg-white dark:bg-gray-900 p-8 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm prose dark:prose-invert max-w-none">
+      <main class="lg:col-span-9 bg-white dark:bg-gray-900 p-8 rounded border border-gray-100 dark:border-gray-800 shadow-sm prose dark:prose-invert max-w-none">
         <div class="space-y-6">
-          <h1 class="text-3xl font-semibold tracking-tight text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-800 pb-4 mt-0">
-             Qu’est-ce que Nomotechnia ?
+          <h1 class="text-3xl font-black tracking-tight text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-800 pb-2 mt-0">
+             NOMOTECHNIA
           </h1>
           
-          <div class="flex items-center gap-2 text-lg italic text-primary-600 dark:text-primary-400">
+          <div class="flex items-center gap-1 text-lg italic text-primary-600 dark:text-primary-400">
             <span></span>
             <em>"Lire, comprendre, commenter les grands arrêts britanniques"</em>
           </div>

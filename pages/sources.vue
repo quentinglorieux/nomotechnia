@@ -1,9 +1,6 @@
 <template>
-  <UDashboardGroup storage-key="sources-dashboard" class="relative flex-1 h-full min-h-0 overflow-hidden bg-white dark:bg-gray-900">
-    <NavSource
-      v-if="globalState.sources && navState.navVisibility"
-      :visible="navState.navVisibility"
-    />
+  <UDashboardGroup :ui="{ base: 'relative flex-1 flex overflow-hidden' }" class="flex-1 flex min-h-0 overflow-hidden">
+    <NavSource />
 
     <MainSource 
       :sourceID="navState.selectedSourceID" 
@@ -53,4 +50,8 @@ watch(
   },
   { immediate: true, deep: true }
 );
+
+onMounted(() => {
+  navState.value.navVisibility = true;
+});
 </script>

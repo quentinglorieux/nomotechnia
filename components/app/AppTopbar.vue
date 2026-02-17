@@ -105,6 +105,14 @@
           square
           aria-label="Administration"
         />
+        <UButton
+          icon="i-lucide-panel-left"
+          variant="ghost"
+          color="neutral"
+          class="md:hidden"
+          @click="navState.navOpen = !navState.navOpen"
+          aria-label="Toggle navigation"
+        />
         <UColorModeButton />
         <UButton
           icon="i-lucide-menu"

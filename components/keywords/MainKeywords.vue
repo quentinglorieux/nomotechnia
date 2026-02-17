@@ -1,5 +1,16 @@
 <template>
   <UDashboardPanel class="flex-1 flex flex-col min-h-0 bg-white dark:bg-gray-900 min-w-0">
+    <template #header>
+      <div class="flex items-center gap-3 w-full px-4 py-2 border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur shrink-0">
+        <UDashboardSidebarToggle class="md:hidden" />
+        <UDashboardSidebarCollapse class="hidden md:flex" />
+        <h1 v-if="kw" class="text-lg font-bold text-gray-900 dark:text-white truncate">
+          <span class="text-primary-500 mr-1">#</span>{{ kw.titre }}
+        </h1>
+        <span v-else class="text-sm font-medium text-gray-500 italic">Navigation par mots-clés</span>
+      </div>
+    </template>
+
     <template #body>
     <!-- Welcome Screen -->
     <div v-if="!kw" class="flex-1 flex items-center justify-center p-8 text-center bg-gray-50 dark:bg-gray-950">
@@ -57,11 +68,11 @@
               <UInput
                 v-model="searchQuery"
                 icon="i-lucide-search"
+                leading
                 placeholder="Filtrer..."
                 size="md"
-                :ui="{ base: 'ps-6' }"
-                class="w-full px-6 sm:w-64"
-                clearable
+                variant="subtle"
+                class="w-full sm:w-64"
               />
             </div>
 

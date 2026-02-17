@@ -19,9 +19,20 @@
         />
       </div>
 
-      <div v-if="fetched_data.abstract" class="bg-slate-200 dark:bg-gray-700 p-4 rounded-lg mb-6">
-        <h3 class="font-semibold mb-2 dark:text-white">Résumé :</h3>
-        <div class="prose prose-sm dark:prose-invert max-w-none" v-html="fetched_data.abstract"></div>
+      <div v-if="fetched_data.abstract" class="bg-slate-200 dark:bg-gray-700/50 p-4 rounded-xl mb-6 border border-slate-300 dark:border-gray-600">
+        <div class="flex items-center gap-2 mb-2 text-gray-700 dark:text-gray-200">
+          <UIcon name="i-lucide-info" class="w-4 h-4" />
+          <h3 class="font-bold text-sm uppercase tracking-wider">Résumé</h3>
+        </div>
+        <div class="prose prose-sm dark:prose-invert max-w-none text-gray-800 dark:text-gray-200 font-medium italic" v-html="fetched_data.abstract"></div>
+      </div>
+
+      <div v-if="fetched_data.keywords_id?.length" class="mb-6">
+        <div class="flex items-center gap-2 mb-2 text-gray-500 dark:text-gray-400">
+          <UIcon name="i-lucide-tags" class="w-4 h-4" />
+          <span class="text-xs font-bold uppercase tracking-wider">Mots-clés</span>
+        </div>
+        <CommentsKeywords :kwList="fetched_data.keywords_id" />
       </div>
 
       <div 
@@ -56,10 +67,16 @@
         <div class="prose prose-sm dark:prose-invert max-w-none italic" v-html="fetched_data.citation"></div>
       </div>
     </div>
+    <div v-else class="flex flex-col items-center justify-center p-12 text-gray-500 animate-pulse">
+      <UIcon name="i-lucide-loader-2" class="animate-spin w-8 h-8 mb-3 text-primary-500" />
+      <p class="text-sm font-medium">Chargement du commentaire...</p>
+    </div>
   </div>
 </template>
 
 <script setup>
+import CommentsKeywords from './sources/CommentsKeywords.vue';
+
 const pdfSection = ref(null);
 const globalState = useGlobalState();
 const prop = defineProps(["com"]);
@@ -90,8 +107,9 @@ const fetched_data = ref();
 // DataFetching of the selected Commentaires(id)
 const { $directus } = useNuxtApp();
 async function retrieveCommentData(id) {
-  const { data } = await useAsyncData(`com-${id}`, () =>
-    $directus.request({
+  if (!id) return;
+  try {
+    const data = await $directus.request({
       method: 'GET',
       path: `/items/commentaires/${id}`,
       params: {
@@ -105,16 +123,19 @@ async function retrieveCommentData(id) {
           "auteur_name",
           "references",
           "meta",
+          "keywords_id.keywords_id.*"
         ]
       }
-    })
-  );
+    });
 
-  if (data.value) {
-    fetched_data.value = data.value;
-    if (!globalState.value.commentaires) globalState.value.commentaires = {};
-    globalState.value.commentaires.titre = data.value.titre;
-    globalState.value.commentaires.references = data.value.references;
+    if (data) {
+      fetched_data.value = data;
+      if (!globalState.value.commentaires) globalState.value.commentaires = {};
+      globalState.value.commentaires.titre = data.titre;
+      globalState.value.commentaires.references = data.references;
+    }
+  } catch (error) {
+    console.error('Error fetching comment data:', error);
   }
 }
 

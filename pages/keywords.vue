@@ -1,9 +1,6 @@
 <template>
-  <UDashboardGroup storage-key="keywords-dashboard" class="relative flex-1 h-full min-h-0 overflow-hidden bg-white dark:bg-gray-900">
-    <NavKeywords
-      v-if="globalState.keywords"
-      :visible="navState.navVisibility"
-    />
+  <UDashboardGroup :ui="{ base: 'relative flex-1 flex overflow-hidden' }" class="flex-1 flex min-h-0 overflow-hidden">
+    <NavKeywords v-if="globalState.keywords" />
 
     <MainKeywords
       :sourceID="navState.selectedKeywordID"

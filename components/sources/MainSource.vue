@@ -1,24 +1,39 @@
 <template>
-  <UDashboardPanel grow class="bg-white dark:bg-gray-900 border-none overflow-hidden">
+    <UDashboardGroup>
+  <UDashboardPanel grow class="bg-white dark:bg-gray-900 border-none overflow-hidden resizable">
     <!-- Main Source Header -->
-    <template v-if="source" #header>
-      <div class="flex flex-col min-w-0">
-        <div class="flex items-center gap-3 min-w-0 bg-slate-200">
-          <h1 class="text-xl font-bold text-gray-100 bg-slate-900 dark:text-slate-900 dark:bg-slate-100 px-3 py-10 w-4/5">
-            {{ source.data.titre }}
-          </h1>
-          <UBadge v-if="source.data.type_de_source" color="neutral" variant="soft" size="sm" class="shrink-0 pr-2 w-1/5">
-            {{ source.data.type_de_source.Nom }}
-          </UBadge>
+    <template #header>
+      <div v-if="source?.data" class="flex items-center gap-3 w-full px-4 py-2 border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur shrink-0">
+        <UDashboardSidebarToggle class="md:hidden" />
+        <UDashboardSidebarCollapse class="hidden md:flex" />
+        
+        <div class="flex-1 min-w-0 flex flex-col">
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg font-bold text-gray-900 dark:text-white truncate">
+              {{ source?.data?.titre || 'Chargement...' }}
+            </h1>
+            <UBadge v-if="source?.data?.type_de_source" color="neutral" variant="soft" size="xs" class="shrink-0 uppercase tracking-tighter text-[10px]">
+              {{ source?.data?.type_de_source?.Nom }}
+            </UBadge>
+          </div>
+          <p v-if="source?.data?.meta" class="text-xs text-gray-500 dark:text-gray-400 truncate font-medium">{{ source?.data?.meta }}</p>
         </div>
-        <p v-if="source.data.meta" class="text-sm font-medium text-gray-100 pl-3 py-2 bg-slate-500 dark:text-gray-400 ">{{ source.data.meta }}</p>
+
+        <div class="flex items-center gap-2">
+          <!-- Add any extra header buttons here -->
+        </div>
+      </div>
+      <div v-else class="flex items-center gap-3 w-full px-4 py-2 border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur shrink-0">
+        <UDashboardSidebarToggle class="md:hidden" />
+        <UDashboardSidebarCollapse class="hidden md:flex" />
+        <span class="text-sm font-medium text-gray-500 italic">Sélectionnez une source...</span>
       </div>
     </template>
 
     <!-- Main Body -->
     <template #body>
       <!-- Info Section if no source selected -->
-      <div v-if="!source" class="h-full flex flex-col items-center justify-center p-8 text-center bg-gray-50/50 dark:bg-gray-950/50">
+      <div v-if="!source?.data" class="h-full flex flex-col items-center justify-center p-8 text-center bg-gray-50/50 dark:bg-gray-950/50">
         <div class="max-w-md space-y-6">
           <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 mb-2">
             <UIcon name="i-lucide-book-open" class="w-10 h-10" />
@@ -38,13 +53,13 @@
         </div>
       </div>
 
-      <!-- Content Split View -->
-      <div v-else class="flex-1 min-h-0 flex overflow-hidden h-full">
+      <!-- Content Split View using Dashboard Components -->
+      <UDashboardGroup v-else grow class="flex-1 h-full min-h-0 overflow-hidden">
         <!-- Panel 1: Content -->
-        <div class="flex-1 min-w-0 overflow-y-auto bg-white dark:bg-gray-900">
-          <div class="p-8 max-w-4xl mx-auto w-full">
-            <div v-if="source.data.content" class="prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert prose-slate prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-white max-w-none">
-              <FlexibleEditorContent :content="source.data.content" :relation-marks="relationMarks" />
+        <UDashboardPanel grow :min-size="300" class="min-w-0 bg-white dark:bg-gray-900 overflow-y-auto">
+          <div v-if="source?.data" class="p-8 max-w-4xl mx-auto w-full">
+            <div v-if="source?.data?.content" class="prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert prose-slate prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-white max-w-none">
+              <FlexibleEditorContent :content="source?.data?.content" :relation-marks="relationMarks" />
             </div>
             <div v-else class="flex flex-col items-center justify-center py-20 text-gray-500 dark:text-gray-400 italic">
               <UIcon name="i-lucide-file-text" class="w-12 h-12 mb-4 opacity-20" />
@@ -52,7 +67,7 @@
             </div>
 
             <!-- PDF Download Card -->
-            <UCard v-if="source.data.fichiers?.length" class="mt-8 border-gray-200 dark:border-gray-800">
+            <UCard v-if="source?.data?.fichiers?.length" class="mt-8 border-gray-200 dark:border-gray-800">
               <template #header>
                 <div class="flex items-center gap-2">
                   <UIcon name="i-lucide-file-text" class="w-5 h-5 text-gray-500 dark:text-gray-400" />
@@ -84,78 +99,92 @@
               </ul>
             </UCard>
           </div>
-        </div>
+        </UDashboardPanel>
 
-        <!-- Panel 2: Details & Links -->
-        <div class="w-[34rem] min-w-md max-w-[42vw] border-l border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 flex flex-col min-h-0 overflow-hidden">
-          <div class="flex-1 flex flex-col min-h-0 overflow-hidden relative h-full">
-            <UTabs :items="sourceTabs" v-model="activeTabIndex" class="flex-1 flex flex-col overflow-hidden min-h-0 h-full">
-              <template #content="{ item }">
-                <div class="flex-1 p-4 min-h-0 overflow-y-auto h-full">
-                  <div v-if="item.slot === 'before-tabs'">
-                    <SourceGenericComments :comments="getCommentsByType(item.label)" />
-                  </div>
-                  
-                  <div v-else-if="item.slot === 'main-comments'">
-                    <SourceComments
-                      v-if="source?.data?.commentaires"
-                      :source="source"
-                      :comSelected="globalState.commentaires"
-                    />
-                  </div>
-
-                  <div v-else-if="item.slot === 'keywords'">
-                    <SourceKeywords :source="source" />
-                  </div>
-
-                  <div v-else-if="item.slot === 'themes'">
-                    <SourceThemes :source="source" />
-                  </div>
-
-                  <div v-else-if="item.slot === 'after-tabs'">
-                    <SourceGenericComments :comments="getCommentsByType(item.label)" />
-          
-                  </div>
-                
-                </div>
-              </template>
-            </UTabs>
-
-            <div 
-              v-if="navState.comVisibility" 
-              class="absolute inset-0 bg-white dark:bg-gray-900 z-10 border-t border-gray-200 dark:border-gray-800 flex flex-col min-h-0 shadow-2xl transition-all duration-300"
-            >
-              <div class="flex items-center justify-between p-2 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-950">
-                <div class="truncate font-semibold px-2 text-sm text-gray-700 dark:text-gray-200">
-                  {{ comTitre }}
-                </div>
+        <!-- Panel 2: Details & Links (Categories & Comments) -->
+        <UDashboardSidebar 
+          id="source-details-panel"
+          collapsible 
+          resizable 
+          side="right"
+          :width="400"
+          :ui="{ root: 'relative hidden md:flex flex-col shrink-0 border-s border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl' }"
+          class="bg-white dark:bg-gray-900 shadow-xl"
+        >
+          <div v-if="source?.data" class="flex-1 flex flex-col min-h-0 relative">
+            <!-- Context 1: Comment Detail view (Priority) -->
+            <div v-if="navState.comID" class="flex-1 flex flex-col min-h-0 bg-white dark:bg-gray-900 z-10 overflow-hidden">
+              <div class="p-2 border-b border-gray-100 dark:border-gray-800 shrink-0 flex items-center bg-gray-50/50 dark:bg-gray-800/50">
                 <UButton
-                  icon="i-lucide-x"
-                  color="neutral"
+                  icon="i-lucide-arrow-left"
                   variant="ghost"
-                  size="sm"
-                  @click="navState.comVisibility = false"
+                  color="gray"
+                  size="xs"
+                  label="Retour aux textes"
+                  @click="closeComment"
                 />
               </div>
-              <UTabs :items="commentDetailTabs" class="flex-1 flex flex-col overflow-hidden min-h-0">
+              <div class="flex-1 overflow-hidden">
+                <CommentaireSide :com-id="navState.comID" />
+              </div>
+            </div>
+
+            <!-- Context 2: Category Tabs (Default) -->
+            <div v-else class="flex-1 flex flex-col min-h-0">
+              <UTabs 
+                v-model="activeTabIndex" 
+                :items="sourceTabs" 
+                class="flex-1 flex flex-col min-h-0"
+                :ui="{ 
+                  root: 'flex flex-col h-full',
+                  list: 'shrink-0 px-3 py-2 border-b border-gray-200 dark:border-gray-800 bg-gray-50/80 dark:bg-gray-900/80 backdrop-blur',
+                  content: 'flex-1 min-h-0 flex flex-col bg-white dark:bg-gray-900',
+                  trigger: 'px-3 py-1.5 text-xs font-bold uppercase tracking-wider'
+                }"
+              >
                 <template #content="{ item }">
-                  <div class="flex-1 p-4 min-h-0 overflow-y-auto h-full">
-                    <div v-if="item.slot === 'content'">
-                      <CommentaireSide :com="navState.comID" />
+                  <div class="flex-1 min-h-0 overflow-y-auto p-0">
+                    <!-- Standard main comments -->
+                    <div v-if="item.value === 'Commentaires'">
+                      <SourceComments
+                        v-if="source?.data?.commentaires"
+                        :source="source"
+                        :target-com-id="navState.comID"
+                      />
                     </div>
-                    <div v-else-if="item.slot === 'keywords'">
-                      <CommentsKeywords :kwList="kwSelectectComment" />
+                    
+                    <!-- Keyword management -->
+                    <div v-else-if="item.value === 'Mots-clés'">
+                      <SourceKeywords :source="source" />
+                    </div>
+
+                    <!-- Theme management -->
+                    <div v-else-if="item.value === 'Thèmes'">
+                      <SourceThemes :source="source" />
+                    </div>
+
+                    <!-- Dynamic generic comments (Avant-propos, etc.) -->
+                    <div v-else>
+                      <SourceGenericComments 
+                        :comments="getCommentsByType(item.value)" 
+                        :target-com-id="navState.comID"
+                      />
                     </div>
                   </div>
                 </template>
               </UTabs>
-           
             </div>
           </div>
-        </div>
-      </div>
+          <!-- Loading placeholder -->
+          <div v-else class="flex-1 flex flex-col items-center justify-center p-8 text-gray-400 bg-gray-50/50 dark:bg-gray-900/50">
+            <UIcon name="i-lucide-loader-2" class="w-8 h-8 animate-spin mb-2 opacity-20" />
+            <span class="text-sm italic">Initialisation du panel...</span>
+          </div>
+        </UDashboardSidebar>
+      </UDashboardGroup>
     </template>
   </UDashboardPanel>
+  </UDashboardGroup>
 </template>
 
 <script setup>
@@ -173,6 +202,7 @@ const navState = useNavState();
 const globalState = useGlobalState();
 const config = useRuntimeConfig();
 const baseUrl = config.public.API_BASE_URL;
+
 const { $directus } = useNuxtApp();
 
 const props = defineProps(["sourceID"]);
@@ -184,19 +214,19 @@ const activeTabIndex = ref('Commentaires'); // Default to 'Commentaires' tab
 const sourceTabs = computed(() => {
   const tabs = [];
   
-  // Before tabs
+  // Before tabs (types < main)
   commentTypesBefore.value.forEach(typeNom => {
-    tabs.push({ label: typeNom, value: typeNom, slot: 'before-tabs' });
+    tabs.push({ label: typeNom, value: typeNom });
   });
 
   // Main tabs
-  tabs.push({ label: 'Commentaires', value: 'Commentaires', slot: 'main-comments' });
-  tabs.push({ label: 'Mots-clés', value: 'Mots-clés', slot: 'keywords' });
-  tabs.push({ label: 'Thèmes', value: 'Thèmes', slot: 'themes' });
+  tabs.push({ label: 'Commentaires', value: 'Commentaires' });
+  tabs.push({ label: 'Mots-clés', value: 'Mots-clés' });
+  tabs.push({ label: 'Thèmes', value: 'Thèmes' });
 
-  // After tabs
+  // After tabs (types > main)
   commentTypesAfter.value.forEach(typeNom => {
-    tabs.push({ label: typeNom, value: typeNom, slot: 'after-tabs' });
+    tabs.push({ label: typeNom, value: typeNom });
   });
 
   return tabs;
@@ -204,7 +234,7 @@ const sourceTabs = computed(() => {
 
 // Tab items for the selected comment detail
 const commentDetailTabs = computed(() => [
-  { label: comTitre.value || 'Détail', slot: 'content', icon: 'i-lucide-file-text' },
+  { label: 'Contenu', slot: 'content', icon: 'i-lucide-file-text' },
   { label: 'Mots-clés associés', slot: 'keywords', icon: 'i-lucide-tags' }
 ]);
 
@@ -219,8 +249,9 @@ const comTitre = computed(() => {
 
 // Data fetching
 async function retrieveSourceData(id) {
-  const { data } = await useAsyncData(`source-${id}`, () => {
-    return $directus.request({
+  if (!id) return;
+  try {
+    const data = await $directus.request({
       method: 'GET',
       path: `/items/sources/${id}`,
       params: {
@@ -228,36 +259,43 @@ async function retrieveSourceData(id) {
           "id", "titre", "type_de_source.*", "meta", 
           "fichiers.directus_files_id.id", "fichiers.directus_files_id.filename_download", 
           "texte", "content", "editor_nodes.id", "editor_nodes.item", "editor_nodes.collection", 
-          "commentaires.*", "commentaires.type.*", "commentaires.keywords_id.keywords_id.*",
+          "commentaires.*", "commentaires.type.*", "commentaires.keywords_id.keywords_id.id",
+          "commentaires.keywords_id.keywords_id.titre",
           "theme_id.titre", "theme_id.id"
         ]
       }
     });
-  });
 
-  if (data.value) {
-    source.value = { data: data.value };
-    activeTabIndex.value = 'Commentaires';
-    
-    if (source.value.data.editor_nodes && source.value.data.content) {
-      injectDataIntoContent(
-        source.value.data.editor_nodes,
-        source.value.data.content
-      );
-    }
+    if (data) {
+      source.value = { data: data };
+      
+      if (data.editor_nodes && data.content) {
+        injectDataIntoContent(
+          data.editor_nodes,
+          data.content
+        );
+      }
 
-    const index = globalState.value.sources.findIndex((x) => x.id === id);
-    if (index !== -1) {
-      globalState.value.sources[index] = source.value.data;
-    } else {
-      globalState.value.sources.push(source.value.data);
+      const index = globalState.value.sources.findIndex((x) => x.id === id);
+      if (index !== -1) {
+        globalState.value.sources[index] = data;
+      } else {
+        globalState.value.sources.push(data);
+      }
     }
+  } catch (error) {
+    console.error('Error fetching source:', error);
   }
 }
 
 // Lifecycle hooks
-onMounted(() => {
-  if (navState.value.selectedSourceID) {
+onMounted(async () => {
+  // Ensure sidebar is visible by default on this page
+  if (navState.value.navVisibility === undefined || navState.value.navVisibility === null) {
+    navState.value.navVisibility = true;
+  }
+  
+  if (!globalState.value.sources?.length) {
     retrieveSourceData(navState.value.selectedSourceID);
     oldID.value = navState.value.selectedSourceID;
   }
@@ -265,12 +303,31 @@ onMounted(() => {
 
 watch(() => navState.value.selectedSourceID, (newVal) => {
   if (newVal && newVal !== oldID.value) {
-    navState.value.comVisibility = false;
-    activeTabIndex.value = commentTypesBefore.value.length;
+    activeTabIndex.value = 'Commentaires';
     retrieveSourceData(newVal);
     oldID.value = newVal;
   }
 });
+
+// Auto-switch tab when a specific comment ID is requested (e.g. from editor links)
+watch(() => navState.value.comID, (newComID) => {
+  if (newComID && source.value?.data?.commentaires) {
+    const comment = source.value.data.commentaires.find(c => c.id === newComID);
+    if (comment) {
+      const type = comment.type?.Nom;
+      if (type) {
+        // If type is 'Commentaire', switch to the 'Commentaires' tab (main tab)
+        // Otherwise switch to the generic tab named after the type
+        activeTabIndex.value = (type === 'Commentaire') ? 'Commentaires' : type;
+      }
+    }
+  }
+});
+
+function closeComment() {
+  navState.value.comID = null;
+  navState.value.comVisibility = false;
+}
 
 // Helpers
 function getCommentsByType(typeNom) {
@@ -290,10 +347,10 @@ const kwSelectectComment = computed(() => {
 });
 
 const commentairePosition = computed(() => {
-  const commentaire = source.value?.data?.commentaires?.find(
-    (c) => c.type?.Nom === "Commentaire"
-  );
-  return commentaire?.type?.sort ?? 0;
+  const commentaire = source.value?.data?.commentaires?.filter(
+    (c) => c.type?.Nom?.toLowerCase() === "commentaire"
+  ) || [];
+  return commentaire[0]?.type?.sort ?? 0;
 });
 
 const commentTypesBefore = computed(() => {

@@ -10,6 +10,7 @@ export const useNavState = () => useState('navigation', () => ({
   sourceID: "",
   comID: "",
   navVisibility: true,
+  navOpen: false,
   comVisibility: false,
   selectedSourceID: "",
   selectedThemeID: "",

@@ -11,7 +11,7 @@
           class="mb-2"
         >
 
-        sss
+        
           <button
             class="w-full text-left flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group"
             @click="selectComment(com)"
@@ -24,7 +24,10 @@
               :loading="loadingStates[com.id]"
               class="shrink-0 pointer-events-none"
             />
-            <div class="text-sm font-medium text-gray-700 dark:text-gray-200 line-clamp-2">
+            <div 
+              class="text-sm font-medium line-clamp-2 transition-colors"
+              :class="selectedCommentId === com.id ? 'text-primary-600 dark:text-primary-400 font-bold' : 'text-gray-700 dark:text-gray-200'"
+            >
               {{ com.titre }}
             </div>
           </button>
@@ -46,6 +49,10 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  targetComId: {
+    type: [String, Number],
+    default: null
+  }
 });
 
 const globalState = useGlobalState();
@@ -55,6 +62,7 @@ const loadingStates = ref({});
 const selectedCommentId = ref(null);
 
 async function selectComment(com) {
+  if (!com?.id) return;
   const id = com.id;
   selectedCommentId.value = id;
   loadingStates.value[id] = true;
@@ -76,15 +84,38 @@ async function selectComment(com) {
 }
 
 watch(
+  () => props.targetComId,
+  (newId) => {
+    if (newId) {
+      const com = props.comments.find(c => c.id === newId);
+      if (com) {
+        selectComment(com);
+      }
+    }
+  },
+  { immediate: true }
+);
+
+watch(
   () => props.comments,
   (comments) => {
-    if (!comments.length) {
+    if (!comments?.length) {
       selectedCommentId.value = null;
       return;
     }
 
-    const hasSelected = comments.some((c) => c.id === selectedCommentId.value);
-    if (!hasSelected) {
+    // External target takes priority
+    if (props.targetComId) {
+      const targetCom = comments.find(c => c.id === props.targetComId);
+      if (targetCom) {
+        selectComment(targetCom);
+        return;
+      }
+    }
+
+    // Check if current selection is still valid for this set of comments
+    const stillExists = comments.some(c => c.id === selectedCommentId.value);
+    if (!stillExists || !selectedCommentId.value) {
       selectComment(comments[0]);
     }
   },

@@ -1,8 +1,6 @@
 <template>
-  <UDashboardGroup storage-key="themes-dashboard" class="relative flex-1 h-full min-h-0 overflow-hidden bg-white dark:bg-gray-900">
-    <NavThemes
-      :visible="navState.navVisibility"
-    />
+  <UDashboardGroup :ui="{ base: 'relative flex-1 flex overflow-hidden' }" class="flex-1 flex min-h-0 overflow-hidden">
+    <NavThemes />
 
     <MainThemes 
       :theme="navState.selectedThemeID" 
@@ -33,5 +31,9 @@ const { data } = await useAsyncData('themes-nav', async () => {
   
   globalState.value.themes = response;
   return response;
+});
+
+onMounted(() => {
+  navState.value.navVisibility = true;
 });
 </script>
